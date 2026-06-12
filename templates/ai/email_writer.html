@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block title %}AI Email Writer — NexaOps{% endblock %}
+{% block page_title %}AI Email Writer{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="flex items-center gap-3 mb-6">
+        <a href="{% url 'ai_assistant' %}" class="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-lg">
+            <i class="fa-solid fa-arrow-left"></i>
+        </a>
+        <div>
+            <h2 class="text-xl font-bold text-gray-900">AI Email Writer</h2>
+            <p class="text-gray-500 text-sm">Generate professional emails instantly with AI</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- Input form -->
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <h3 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-sliders text-indigo-600"></i> Email Details
+            </h3>
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Email Purpose <span
+                            class="text-red-500">*</span></label>
+                    <input type="text" name="purpose" required placeholder="e.g. Follow up on project proposal"
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Recipient</label>
+                    <input type="text" name="recipient" placeholder="e.g. Client, Manager, Team"
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Tone</label>
+                    <select name="tone"
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                        <option value="professional">Professional</option>
+                        <option value="friendly">Friendly</option>
+                        <option value="formal">Formal</option>
+                        <option value="urgent">Urgent</option>
+                        <option value="apologetic">Apologetic</option>
+                    </select>
+                </div>
+                <div class="mb-5">
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Key Details</label>
+                    <textarea name="details" rows="3" placeholder="Any specific points to include..."
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"></textarea>
+                </div>
+                <button type="submit"
+                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-sm font-medium transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-robot"></i> Generate Email
+                </button>
+            </form>
+        </div>
+
+        <!-- Output -->
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <h3 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-envelope text-indigo-600"></i> Generated Email
+            </h3>
+            {% if result %}
+            <div class="bg-gray-50 rounded-xl p-4 text-sm text-gray-800 leading-relaxed whitespace-pre-wrap font-mono">
+                {{ result }}</div>
+            <button onclick="navigator.clipboard.writeText(document.querySelector('.whitespace-pre-wrap').innerText)"
+                class="mt-3 w-full border border-gray-200 text-gray-600 hover:bg-gray-50 py-2 rounded-xl text-sm transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-copy"></i> Copy Email
+            </button>
+            {% else %}
+            <div class="flex flex-col items-center justify-center h-64 text-gray-300">
+                <i class="fa-solid fa-envelope text-5xl mb-3"></i>
+                <p class="text-sm text-gray-400">Fill in the details and click Generate</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

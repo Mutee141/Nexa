@@ -1,0 +1,245 @@
+{% extends 'base.html' %}
+{% block title %}AI Assistant — NexaOps{% endblock %}
+{% block page_title %}AI Assistant{% endblock %}
+
+{% block content %}
+<div class="flex gap-6 h-full" style="height: calc(100vh - 130px)">
+
+    <!-- Left: Chat -->
+    <div class="flex-1 flex flex-col bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+
+        <!-- Chat header -->
+        <div class="flex items-center gap-3 px-5 py-4 border-b border-gray-100">
+            <div class="w-9 h-9 bg-indigo-600 rounded-xl flex items-center justify-center">
+                <i class="fa-solid fa-robot text-white text-sm"></i>
+            </div>
+            <div>
+                <p class="font-semibold text-gray-900 text-sm">NexaOps AI</p>
+                <p class="text-xs text-green-500 flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 bg-green-500 rounded-full inline-block"></span> Online
+                </p>
+            </div>
+            <button onclick="clearChat()"
+                class="ml-auto text-xs text-gray-400 hover:text-gray-600 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition">
+                <i class="fa-solid fa-rotate-left mr-1"></i> Clear
+            </button>
+        </div>
+
+        <!-- Messages area -->
+        <div id="chat-messages" class="flex-1 overflow-y-auto p-5 space-y-4">
+
+            <!-- Welcome message -->
+            <div class="flex items-start gap-3">
+                <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <i class="fa-solid fa-robot text-indigo-600 text-xs"></i>
+                </div>
+                <div class="bg-gray-50 rounded-2xl rounded-tl-none px-4 py-3 max-w-lg">
+                    <p class="text-sm text-gray-800">Hello! I'm your <strong>NexaOps AI Assistant</strong>. I can help
+                        you with:</p>
+                    <ul class="text-sm text-gray-600 mt-2 space-y-1">
+                        <li>📋 Breaking down projects into tasks</li>
+                        <li>✉️ Writing professional emails</li>
+                        <li>📊 Generating business reports</li>
+                        <li>💡 Answering business questions</li>
+                        <li>📅 Planning meetings and agendas</li>
+                    </ul>
+                    <p class="text-sm text-gray-600 mt-2">What can I help you with today?</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Typing indicator (hidden by default) -->
+        <div id="typing-indicator" class="hidden px-5 pb-2">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <i class="fa-solid fa-robot text-indigo-600 text-xs"></i>
+                </div>
+                <div class="bg-gray-50 rounded-2xl rounded-tl-none px-4 py-3">
+                    <div class="flex gap-1 items-center">
+                        <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay:0ms"></div>
+                        <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay:150ms">
+                        </div>
+                        <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay:300ms">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input area -->
+        <div class="px-5 py-4 border-t border-gray-100">
+            <div class="flex gap-3">
+                <input id="chat-input" type="text" placeholder="Ask anything about your business..."
+                    class="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    onkeypress="if(event.key==='Enter') sendMessage()">
+                <button onclick="sendMessage()"
+                    class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl text-sm font-medium transition flex items-center gap-2">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    <span>Send</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right: Quick tools -->
+    <div class="w-72 flex flex-col gap-4">
+
+        <!-- Quick prompts -->
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+            <p class="text-sm font-semibold text-gray-800 mb-3">Quick Prompts</p>
+            <div class="space-y-2">
+                {% for prompt in quick_prompts %}
+                <button onclick="insertPrompt('{{ prompt.text }}')"
+                    class="w-full text-left text-xs px-3 py-2.5 rounded-xl border border-gray-100 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-700 transition text-gray-600">
+                    {{ prompt.icon }} {{ prompt.label }}
+                </button>
+                {% endfor %}
+                <button onclick="insertPrompt('Write a professional email to a client about project delays')"
+                    class="w-full text-left text-xs px-3 py-2.5 rounded-xl border border-gray-100 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-700 transition text-gray-600">
+                    ✉️ Write a client delay email
+                </button>
+                <button onclick="insertPrompt('Create a 5-task action plan for launching a new product')"
+                    class="w-full text-left text-xs px-3 py-2.5 rounded-xl border border-gray-100 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-700 transition text-gray-600">
+                    🚀 Product launch task plan
+                </button>
+                <button onclick="insertPrompt('What are the best practices for remote team management?')"
+                    class="w-full text-left text-xs px-3 py-2.5 rounded-xl border border-gray-100 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-700 transition text-gray-600">
+                    👥 Remote team best practices
+                </button>
+                <button onclick="insertPrompt('Summarize the key steps for a successful project kickoff meeting')"
+                    class="w-full text-left text-xs px-3 py-2.5 rounded-xl border border-gray-100 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-700 transition text-gray-600">
+                    📅 Project kickoff checklist
+                </button>
+                <button onclick="insertPrompt('Give me a weekly productivity report template for my team')"
+                    class="w-full text-left text-xs px-3 py-2.5 rounded-xl border border-gray-100 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-700 transition text-gray-600">
+                    📊 Weekly report template
+                </button>
+            </div>
+        </div>
+
+        <!-- AI Tools links -->
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+            <p class="text-sm font-semibold text-gray-800 mb-3">AI Tools</p>
+            <div class="space-y-2">
+                <a href="{% url 'ai_email_writer' %}"
+                    class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-gray-50 transition">
+                    <div class="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
+                        <i class="fa-solid fa-envelope text-blue-600 text-xs"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-medium text-gray-800">Email Writer</p>
+                        <p class="text-xs text-gray-400">AI-powered emails</p>
+                    </div>
+                </a>
+                <a href="{% url 'ai_task_generator' %}"
+                    class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-gray-50 transition">
+                    <div class="w-8 h-8 bg-green-50 rounded-lg flex items-center justify-center">
+                        <i class="fa-solid fa-list-check text-green-600 text-xs"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-medium text-gray-800">Task Generator</p>
+                        <p class="text-xs text-gray-400">Break goals into tasks</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let chatHistory = [];
+
+    function sendMessage() {
+        const input = document.getElementById('chat-input');
+        const msg = input.value.trim();
+        if (!msg) return;
+
+        appendMessage('user', msg);
+        chatHistory.push({ role: 'user', content: msg });
+        input.value = '';
+
+        document.getElementById('typing-indicator').classList.remove('hidden');
+        scrollToBottom();
+
+        fetch("{% url 'ai_chat' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ message: msg, history: chatHistory })
+        })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('typing-indicator').classList.add('hidden');
+                if (data.reply) {
+                    appendMessage('ai', data.reply);
+                    chatHistory.push({ role: 'assistant', content: data.reply });
+                } else {
+                    appendMessage('ai', '⚠️ ' + (data.error || 'Something went wrong. Please try again.'));
+                }
+            })
+            .catch(() => {
+                document.getElementById('typing-indicator').classList.add('hidden');
+                appendMessage('ai', '⚠️ Connection error. Please check your internet and try again.');
+            });
+    }
+
+    function appendMessage(role, text) {
+        const container = document.getElementById('chat-messages');
+        const isAI = role === 'ai';
+
+        const formatted = text
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\n/g, '<br>');
+
+        const html = isAI ? `
+        <div class="flex items-start gap-3">
+            <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <i class="fa-solid fa-robot text-indigo-600 text-xs"></i>
+            </div>
+            <div class="bg-gray-50 rounded-2xl rounded-tl-none px-4 py-3 max-w-lg text-sm text-gray-800 leading-relaxed">${formatted}</div>
+        </div>
+    ` : `
+        <div class="flex items-start gap-3 justify-end">
+            <div class="bg-indigo-600 rounded-2xl rounded-tr-none px-4 py-3 max-w-lg text-sm text-white leading-relaxed">${formatted}</div>
+            <div class="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs font-semibold">
+                {{ request.user.first_name|first|upper }}
+            </div>
+        </div>
+    `;
+
+        container.insertAdjacentHTML('beforeend', html);
+        scrollToBottom();
+    }
+
+    function scrollToBottom() {
+        const container = document.getElementById('chat-messages');
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function insertPrompt(text) {
+        document.getElementById('chat-input').value = text;
+        document.getElementById('chat-input').focus();
+    }
+
+    function clearChat() {
+        chatHistory = [];
+        const container = document.getElementById('chat-messages');
+        container.innerHTML = `
+        <div class="flex items-start gap-3">
+            <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <i class="fa-solid fa-robot text-indigo-600 text-xs"></i>
+            </div>
+            <div class="bg-gray-50 rounded-2xl rounded-tl-none px-4 py-3 max-w-lg">
+                <p class="text-sm text-gray-800">Chat cleared! How can I help you?</p>
+            </div>
+        </div>
+    `;
+    }
+</script>
+{% endblock %}

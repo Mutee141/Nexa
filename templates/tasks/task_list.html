@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% block title %}Tasks — NexaOps{% endblock %}
+{% block page_title %}Tasks{% endblock %}
+
+{% block content %}
+
+<!-- Header row -->
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h2 class="text-2xl font-bold text-gray-900">All Tasks</h2>
+        <p class="text-gray-500 text-sm mt-1">Manage and track your team's work</p>
+    </div>
+    <a href="{% url 'task_create' %}" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition">
+        <i class="fa-solid fa-plus"></i> New Task
+    </a>
+</div>
+
+<!-- Stats row -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm text-center">
+        <p class="text-2xl font-bold text-gray-900">{{ total }}</p>
+        <p class="text-xs text-gray-500 mt-1">Total</p>
+    </div>
+    <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm text-center">
+        <p class="text-2xl font-bold text-gray-500">{{ todo }}</p>
+        <p class="text-xs text-gray-500 mt-1">To Do</p>
+    </div>
+    <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm text-center">
+        <p class="text-2xl font-bold text-blue-600">{{ in_progress }}</p>
+        <p class="text-xs text-gray-500 mt-1">In Progress</p>
+    </div>
+    <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm text-center">
+        <p class="text-2xl font-bold text-green-600">{{ done }}</p>
+        <p class="text-xs text-gray-500 mt-1">Done</p>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 mb-5 flex flex-wrap gap-3 items-center">
+    <span class="text-sm text-gray-500 font-medium">Filter:</span>
+
+    <a href="{% url 'task_list' %}" class="text-xs px-3 py-1.5 rounded-lg border {% if not selected_status %}bg-indigo-600 text-white border-indigo-600{% else %}border-gray-200 text-gray-600 hover:bg-gray-50{% endif %}">All</a>
+    <a href="?status=todo" class="text-xs px-3 py-1.5 rounded-lg border {% if selected_status == 'todo' %}bg-gray-600 text-white border-gray-600{% else %}border-gray-200 text-gray-600 hover:bg-gray-50{% endif %}">To Do</a>
+    <a href="?status=in_progress" class="text-xs px-3 py-1.5 rounded-lg border {% if selected_status == 'in_progress' %}bg-blue-600 text-white border-blue-600{% else %}border-gray-200 text-gray-600 hover:bg-gray-50{% endif %}">In Progress</a>
+    <a href="?status=review" class="text-xs px-3 py-1.5 rounded-lg border {% if selected_status == 'review' %}bg-amber-500 text-white border-amber-500{% else %}border-gray-200 text-gray-600 hover:bg-gray-50{% endif %}">Review</a>
+    <a href="?status=done" class="text-xs px-3 py-1.5 rounded-lg border {% if selected_status == 'done' %}bg-green-600 text-white border-green-600{% else %}border-gray-200 text-gray-600 hover:bg-gray-50{% endif %}">Done</a>
+
+    <div class="ml-auto flex gap-2">
+        <a href="?priority=critical" class="text-xs px-3 py-1.5 rounded-lg border {% if selected_priority == 'critical' %}bg-red-600 text-white border-red-600{% else %}border-gray-200 text-gray-600 hover:bg-gray-50{% endif %}">Critical</a>
+        <a href="?priority=high" class="text-xs px-3 py-1.5 rounded-lg border {% if selected_priority == 'high' %}bg-orange-500 text-white border-orange-500{% else %}border-gray-200 text-gray-600 hover:bg-gray-50{% endif %}">High</a>
+        <a href="?priority=medium" class="text-xs px-3 py-1.5 rounded-lg border {% if selected_priority == 'medium' %}bg-yellow-500 text-white border-yellow-500{% else %}border-gray-200 text-gray-600 hover:bg-gray-50{% endif %}">Medium</a>
+    </div>
+</div>
+
+<!-- Task table -->
+<div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+    <table class="w-full text-sm">
+        <thead class="bg-gray-50 border-b border-gray-100">
+            <tr>
+                <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Task</th>
+                <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Project</th>
+                <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden lg:table-cell">Assigned To</th>
+                <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Priority</th>
+                <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden lg:table-cell">Due Date</th>
+                <th class="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-50">
+            {% for task in tasks %}
+            <tr class="hover:bg-gray-50 transition">
+                <td class="px-5 py-4">
+                    <a href="{% url 'task_detail' task.pk %}" class="font-medium text-gray-900 hover:text-indigo-600">{{ task.title }}</a>
+                    {% if task.description %}
+                    <p class="text-xs text-gray-400 mt-0.5 truncate max-w-xs">{{ task.description }}</p>
+                    {% endif %}
+                </td>
+                <td class="px-4 py-4 hidden md:table-cell">
+                    {% if task.project %}
+                    <span class="text-xs bg-violet-50 text-violet-700 px-2 py-1 rounded-lg">{{ task.project.name }}</span>
+                    {% else %}
+                    <span class="text-xs text-gray-400">—</span>
+                    {% endif %}
+                </td>
+                <td class="px-4 py-4 hidden lg:table-cell">
+                    {% if task.assigned_to %}
+                    <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 bg-indigo-100 text-indigo-700 rounded-full flex items-center justify-center text-xs font-semibold">
+                            {{ task.assigned_to.first_name|first|upper }}
+                        </div>
+                        <span class="text-gray-700">{{ task.assigned_to.get_full_name }}</span>
+                    </div>
+                    {% else %}
+                    <span class="text-xs text-gray-400">Unassigned</span>
+                    {% endif %}
+                </td>
+                <td class="px-4 py-4">
+                    <span class="text-xs px-2.5 py-1 rounded-full font-medium
+                        {% if task.status == 'done' %}bg-green-100 text-green-700
+                        {% elif task.status == 'in_progress' %}bg-blue-100 text-blue-700
+                        {% elif task.status == 'review' %}bg-amber-100 text-amber-700
+                        {% else %}bg-gray-100 text-gray-600{% endif %}">
+                        {{ task.get_status_display }}
+                    </span>
+                </td>
+                <td class="px-4 py-4">
+                    <span class="text-xs px-2.5 py-1 rounded-full font-medium
+                        {% if task.priority == 'critical' %}bg-red-100 text-red-700
+                        {% elif task.priority == 'high' %}bg-orange-100 text-orange-700
+                        {% elif task.priority == 'medium' %}bg-yellow-100 text-yellow-700
+                        {% else %}bg-gray-100 text-gray-500{% endif %}">
+                        {{ task.get_priority_display }}
+                    </span>
+                </td>
+                <td class="px-4 py-4 hidden lg:table-cell text-xs text-gray-500">
+                    {% if task.due_date %}{{ task.due_date|date:"M d, Y" }}{% else %}—{% endif %}
+                </td>
+                <td class="px-4 py-4 text-center">
+                    <div class="flex items-center justify-center gap-2">
+                        <a href="{% url 'task_edit' task.pk %}" class="text-indigo-500 hover:text-indigo-700 p-1.5 hover:bg-indigo-50 rounded-lg transition" title="Edit">
+                            <i class="fa-solid fa-pen-to-square text-sm"></i>
+                        </a>
+                        <form method="post" action="{% url 'task_delete' task.pk %}" onsubmit="return confirm('Delete this task?')">
+                            {% csrf_token %}
+                            <button type="submit" class="text-red-400 hover:text-red-600 p-1.5 hover:bg-red-50 rounded-lg transition" title="Delete">
+                                <i class="fa-solid fa-trash text-sm"></i>
+                            </button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="px-5 py-16 text-center">
+                    <i class="fa-solid fa-list-check text-4xl text-gray-200 mb-3 block"></i>
+                    <p class="text-gray-400 font-medium">No tasks found</p>
+                    <p class="text-gray-300 text-xs mt-1">Create your first task to get started</p>
+                    <a href="{% url 'task_create' %}" class="inline-flex items-center gap-2 mt-4 bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm hover:bg-indigo-700 transition">
+                        <i class="fa-solid fa-plus"></i> Create Task
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

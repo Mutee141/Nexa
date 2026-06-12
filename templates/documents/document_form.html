@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block title %}{% if document %}Edit{% else %}Upload{% endif %} Document — NexaOps{% endblock %}
+{% block page_title %}{% if document %}Edit Document{% else %}Upload Document{% endif %}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="flex items-center gap-3 mb-6">
+        <a href="{% url 'document_list' %}" class="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-lg transition">
+            <i class="fa-solid fa-arrow-left"></i>
+        </a>
+        <div>
+            <h2 class="text-xl font-bold text-gray-900">{% if document %}Edit Document Details{% else %}Upload New Document{% endif %}</h2>
+            <p class="text-gray-500 text-sm">{% if document %}Update information for this file{% else %}Add a new file to the repository{% endif %}</p>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="mb-5">
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Document Title <span class="text-red-500">*</span></label>
+                <input type="text" name="title" value="{{ document.title|default:'' }}" required
+                    placeholder="e.g. Employee Handbook 2024"
+                    class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+
+            <div class="mb-5">
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Category</label>
+                <select name="category" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                    <option value="general"   {% if document.category == 'general' or not document %}selected{% endif %}>General</option>
+                    <option value="hr"        {% if document.category == 'hr' %}selected{% endif %}>HR</option>
+                    <option value="finance"   {% if document.category == 'finance' %}selected{% endif %}>Finance</option>
+                    <option value="legal"     {% if document.category == 'legal' %}selected{% endif %}>Legal</option>
+                    <option value="technical" {% if document.category == 'technical' %}selected{% endif %}>Technical</option>
+                    <option value="policy"    {% if document.category == 'policy' %}selected{% endif %}>Policy</option>
+                </select>
+            </div>
+
+            <div class="mb-5">
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Description</label>
+                <textarea name="description" rows="3" placeholder="Briefly describe the contents of this document..."
+                    class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none">{{ document.description|default:'' }}</textarea>
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">File {% if not document %}<span class="text-red-500">*</span>{% endif %}</label>
+                {% if document %}
+                <div class="mb-2 text-sm text-gray-600">
+                    Current file: <a href="{{ document.file.url }}" target="_blank" class="text-indigo-600 hover:underline">{{ document.file.name }}</a>
+                </div>
+                {% endif %}
+                <input type="file" name="file" {% if not document %}required{% endif %}
+                    class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+            </div>
+
+            <div class="flex items-center gap-3 pt-2 border-t border-gray-100">
+                <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-sm font-medium transition">
+                    {% if document %}<i class="fa-solid fa-floppy-disk mr-1"></i> Save Changes
+                    {% else %}<i class="fa-solid fa-cloud-arrow-up mr-1"></i> Upload Document{% endif %}
+                </button>
+                <a href="{% url 'document_list' %}" class="flex-1 text-center border border-gray-200 text-gray-600 hover:bg-gray-50 py-2.5 rounded-xl text-sm font-medium transition">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

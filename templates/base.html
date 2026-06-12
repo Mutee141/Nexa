@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}NexaOps{% endblock %}</title>
+
+    <!-- Tailwind CSS via CDN (no install needed) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tailwind custom config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .sidebar-link {
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-link:hover {
+            transform: translateX(4px);
+        }
+
+        .sidebar-link.active {
+            background: rgba(99, 102, 241, 0.15);
+            border-left: 3px solid #6366f1;
+        }
+
+        .card-hover {
+            transition: all 0.2s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+        }
+    </style>
+
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body class="bg-gray-50 text-gray-800">
+
+    <div class="flex h-screen overflow-hidden">
+
+        <!-- ===== SIDEBAR ===== -->
+        <aside id="sidebar" class="w-64 bg-gray-900 text-white flex flex-col flex-shrink-0 h-full overflow-y-auto">
+
+            <!-- Logo -->
+            <div class="flex items-center gap-3 px-6 py-5 border-b border-gray-700">
+                <div class="w-9 h-9 bg-indigo-600 rounded-xl flex items-center justify-center">
+                    <i class="fa-solid fa-brain text-white text-sm"></i>
+                </div>
+                <div>
+                    <p class="font-bold text-white text-base leading-none">NexaOps</p>
+                    <p class="text-gray-400 text-xs">AI Business Platform</p>
+                </div>
+            </div>
+
+            <!-- Nav links -->
+            <nav class="flex-1 px-3 py-4 space-y-1">
+
+                <p class="text-gray-500 text-xs font-semibold uppercase tracking-wider px-3 mb-2">Main</p>
+
+                <a href="/dashboard/"
+                    class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800 text-sm {% if request.path == '/dashboard/' %}active text-white{% endif %}">
+                    <i class="fa-solid fa-house-chimney w-5 text-center"></i>
+                    <span>Dashboard</span>
+                </a>
+
+                <a href="/tasks/"
+                    class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800 text-sm {% if '/tasks/' in request.path %}active text-white{% endif %}">
+                    <i class="fa-solid fa-list-check w-5 text-center"></i>
+                    <span>Tasks</span>
+                </a>
+
+                <a href="/projects/"
+                    class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800 text-sm {% if '/projects/' in request.path %}active text-white{% endif %}">
+                    <i class="fa-solid fa-diagram-project w-5 text-center"></i>
+                    <span>Projects</span>
+                </a>
+
+                <a href="/employees/"
+                    class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800 text-sm {% if '/employees/' in request.path %}active text-white{% endif %}">
+                    <i class="fa-solid fa-users w-5 text-center"></i>
+                    <span>Employees</span>
+                </a>
+
+                <a href="/meetings/"
+                    class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800 text-sm {% if '/meetings/' in request.path %}active text-white{% endif %}">
+                    <i class="fa-solid fa-video w-5 text-center"></i>
+                    <span>Meetings</span>
+                </a>
+
+                <a href="/documents/"
+                    class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800 text-sm {% if '/documents/' in request.path %}active text-white{% endif %}">
+                    <i class="fa-solid fa-folder-open w-5 text-center"></i>
+                    <span>Documents</span>
+                </a>
+
+                <div class="pt-3">
+                    <p class="text-gray-500 text-xs font-semibold uppercase tracking-wider px-3 mb-2">AI Tools</p>
+                </div>
+
+                <a href="/ai/assistant/"
+                    class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800 text-sm {% if '/ai/' in request.path %}active text-white{% endif %}">
+                    <i class="fa-solid fa-robot w-5 text-center text-indigo-400"></i>
+                    <span>AI Assistant</span>
+                    <span class="ml-auto bg-indigo-600 text-white text-xs px-1.5 py-0.5 rounded-full">AI</span>
+                </a>
+
+                <div class="pt-3">
+                    <p class="text-gray-500 text-xs font-semibold uppercase tracking-wider px-3 mb-2">Settings</p>
+                </div>
+
+                <a href="/admin/"
+                    class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800 text-sm">
+                    <i class="fa-solid fa-shield-halved w-5 text-center"></i>
+                    <span>Admin Panel</span>
+                </a>
+
+            </nav>
+
+            <!-- User info at bottom -->
+            <div class="px-4 py-4 border-t border-gray-700">
+                <a href="/accounts/profile/"
+                    class="flex items-center gap-3 hover:bg-gray-800 rounded-xl px-2 py-2 transition">
+                    <div
+                        class="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white text-sm font-semibold flex-shrink-0">
+                        {% if request.user.avatar %}
+                        <img src="{{ request.user.avatar.url }}" class="w-8 h-8 rounded-full object-cover">
+                        {% else %}
+                        {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
+                        {% endif %}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-white text-sm font-medium truncate">{{
+                            request.user.get_full_name|default:request.user.email }}</p>
+                        <p class="text-gray-400 text-xs truncate">{{ request.user.email }}</p>
+                    </div>
+                    <a href="/accounts/logout/" class="text-gray-400 hover:text-white text-sm p-1">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    </a>
+                </a>
+            </div>
+
+        </aside>
+
+        <!-- ===== MAIN CONTENT ===== -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+
+            <!-- Top navbar -->
+            <header class="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between flex-shrink-0">
+                <div class="flex items-center gap-3">
+                    <h1 class="text-lg font-semibold text-gray-800">{% block page_title %}Dashboard{% endblock %}</h1>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button class="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg">
+                        <i class="fa-solid fa-bell"></i>
+                        <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                    </button>
+                    <div
+                        class="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white text-sm font-semibold cursor-pointer">
+                        {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page content -->
+            <main class="flex-1 overflow-y-auto p-6">
+                {% if messages %}
+                {% for message in messages %}
+                <div class="mb-4 px-4 py-3 rounded-lg text-sm
+                        {% if message.tags == 'success' %}bg-green-50 text-green-800 border border-green-200
+                        {% elif message.tags == 'error' %}bg-red-50 text-red-800 border border-red-200
+                        {% else %}bg-blue-50 text-blue-800 border border-blue-200{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+                {% endif %}
+
+                {% block content %}{% endblock %}
+            </main>
+
+        </div>
+    </div>
+
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

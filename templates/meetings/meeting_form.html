@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% block title %}{% if meeting %}Edit{% else %}New{% endif %} Meeting — NexaOps{% endblock %}
+{% block page_title %}{% if meeting %}Edit Meeting{% else %}Schedule Meeting{% endif %}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="flex items-center gap-3 mb-6">
+        <a href="{% url 'meeting_list' %}" class="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-lg">
+            <i class="fa-solid fa-arrow-left"></i>
+        </a>
+        <div>
+            <h2 class="text-xl font-bold text-gray-900">{% if meeting %}Edit Meeting{% else %}Schedule New Meeting{% endif %}</h2>
+            <p class="text-gray-500 text-sm">{% if meeting %}Update meeting details{% else %}Set up a new meeting{% endif %}</p>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="mb-5">
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Meeting Title <span
+                        class="text-red-500">*</span></label>
+                <input type="text" name="title" value="{{ meeting.title|default:'' }}" required
+                    placeholder="e.g. Weekly Team Standup"
+                    class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+
+            <div class="mb-5">
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Description / Agenda</label>
+                <textarea name="description" rows="3" placeholder="What will be discussed?"
+                    class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none">{{ meeting.description|default:'' }}</textarea>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-5">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Start Time <span
+                            class="text-red-500">*</span></label>
+                    <input type="datetime-local" name="start_time" value="{{ start_fmt|default:'' }}" required
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">End Time <span
+                            class="text-red-500">*</span></label>
+                    <input type="datetime-local" name="end_time" value="{{ end_fmt|default:'' }}" required
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-5">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Location</label>
+                    <input type="text" name="location" value="{{ meeting.location|default:'' }}"
+                        placeholder="e.g. Conference Room A"
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Meeting Link</label>
+                    <input type="url" name="meeting_link" value="{{ meeting.meeting_link|default:'' }}"
+                        placeholder="https://meet.google.com/..."
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+            </div>
+
+            {% if meeting %}
+            <div class="mb-5">
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Status</label>
+                <select name="status"
+                    class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                    <option value="scheduled" {% if meeting.status == 'scheduled' %}selected{% endif %}>Scheduled</option>
+                    <option value="completed" {% if meeting.status == 'completed' %}selected{% endif %}>Completed</option>
+                    <option value="cancelled" {% if meeting.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                </select>
+            </div>
+
+            <div class="mb-5">
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Meeting Notes</label>
+                <textarea name="notes" rows="4" placeholder="What was discussed? Key decisions made..."
+                    class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none">{{ meeting.notes|default:'' }}</textarea>
+            </div>
+            {% endif %}
+
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Attendees</label>
+                <div class="border border-gray-200 rounded-xl p-3 max-h-40 overflow-y-auto space-y-1">
+                    {% for user in users %}
+                    <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 px-2 py-1.5 rounded-lg">
+                        <input type="checkbox" name="attendees" value="{{ user.pk }}" {% if meeting and user in meeting.attendees.all %}checked{% endif %} class="rounded text-indigo-600">
+                        <div
+                            class="w-7 h-7 bg-indigo-100 text-indigo-700 rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0">
+                            {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+                        </div>
+                        <span class="text-sm text-gray-700">{{ user.get_full_name|default:user.email }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="flex gap-3 pt-2 border-t border-gray-100">
+                <button type="submit"
+                    class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-sm font-medium transition">
+                    {% if meeting %}<i class="fa-solid fa-floppy-disk mr-1"></i> Save Changes
+                    {% else %}<i class="fa-solid fa-calendar-plus mr-1"></i> Schedule Meeting{% endif %}
+                </button>
+                <a href="{% url 'meeting_list' %}"
+                    class="flex-1 text-center border border-gray-200 text-gray-600 hover:bg-gray-50 py-2.5 rounded-xl text-sm font-medium transition">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

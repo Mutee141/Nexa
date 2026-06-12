@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block title %}Upload Document — NexaOps{% endblock %}
+{% block page_title %}Upload Document{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto">
+    <div class="flex items-center gap-3 mb-6">
+        <a href="{% url 'document_list' %}" class="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-lg">
+            <i class="fa-solid fa-arrow-left"></i>
+        </a>
+        <div>
+            <h2 class="text-xl font-bold text-gray-900">Upload Document</h2>
+            <p class="text-gray-500 text-sm">Add a file to your document library</p>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="mb-5">
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Document Title <span
+                        class="text-red-500">*</span></label>
+                <input type="text" name="title" required placeholder="e.g. Employee Handbook 2026"
+                    class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+
+            <div class="mb-5">
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Description</label>
+                <textarea name="description" rows="3" placeholder="Brief description of this document..."
+                    class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"></textarea>
+            </div>
+
+            <div class="mb-5">
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Category</label>
+                <select name="category"
+                    class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                    <option value="general">General</option>
+                    <option value="hr">HR</option>
+                    <option value="finance">Finance</option>
+                    <option value="legal">Legal</option>
+                    <option value="technical">Technical</option>
+                    <option value="policy">Policy</option>
+                </select>
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">File <span
+                        class="text-red-500">*</span></label>
+                <div class="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:border-indigo-400 transition cursor-pointer"
+                    onclick="document.getElementById('file-input').click()">
+                    <i class="fa-solid fa-cloud-arrow-up text-3xl text-gray-300 mb-2 block"></i>
+                    <p class="text-sm text-gray-500">Click to browse or drag & drop</p>
+                    <p class="text-xs text-gray-400 mt-1">PDF, Word, Excel, Images supported</p>
+                    <input type="file" id="file-input" name="file" required class="hidden"
+                        onchange="document.getElementById('file-name').textContent = this.files[0]?.name || ''">
+                </div>
+                <p id="file-name" class="text-xs text-indigo-600 mt-2 text-center font-medium"></p>
+            </div>
+
+            <div class="flex gap-3">
+                <button type="submit"
+                    class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-sm font-medium transition">
+                    <i class="fa-solid fa-cloud-arrow-up mr-1"></i> Upload Document
+                </button>
+                <a href="{% url 'document_list' %}"
+                    class="flex-1 text-center border border-gray-200 text-gray-600 hover:bg-gray-50 py-2.5 rounded-xl text-sm font-medium transition">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
