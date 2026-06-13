@@ -27,6 +27,7 @@ SECRET_KEY = 'django-insecure-wqe^pxrju4v#3%@7(hf!)u=2-cw*xuqc!#le4v%_(wq0@9#48d
 DEBUG = True
 
 ALLOWED_HOSTS = ['nexaops.onrender.com', 'localhost', '127.0.0.1']
+CSRF_TRUSTED_ORIGINS = ['https://nexaops.onrender.com']
 
 
 # Application definition
