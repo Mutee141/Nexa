@@ -7,79 +7,399 @@
     <title>About — NexaOps</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Inter', sans-serif
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            background: #050508;
+        }
+
+        .aurora-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background:
+                radial-gradient(ellipse 80% 50% at 20% -10%, rgba(99, 102, 241, 0.22), transparent),
+                radial-gradient(ellipse 60% 50% at 90% 10%, rgba(168, 85, 247, 0.18), transparent),
+                radial-gradient(ellipse 60% 50% at 50% 100%, rgba(34, 211, 238, 0.1), transparent),
+                #050508;
+            animation: auroraShift 18s ease-in-out infinite;
+        }
+
+        @keyframes auroraShift {
+
+            0%,
+            100% {
+                filter: hue-rotate(0deg) brightness(1);
+            }
+
+            50% {
+                filter: hue-rotate(20deg) brightness(1.08);
+            }
+        }
+
+        .grid-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+            background-size: 60px 60px;
+            mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 80%);
+        }
+
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.4;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .orb1 {
+            width: 450px;
+            height: 450px;
+            background: radial-gradient(circle, #6366f1, transparent 70%);
+            top: -150px;
+            left: -100px;
+            animation: floatOrb1 14s ease-in-out infinite;
+        }
+
+        .orb2 {
+            width: 380px;
+            height: 380px;
+            background: radial-gradient(circle, #a855f7, transparent 70%);
+            bottom: -120px;
+            right: -100px;
+            animation: floatOrb2 16s ease-in-out infinite;
+        }
+
+        @keyframes floatOrb1 {
+
+            0%,
+            100% {
+                transform: translate(0, 0)
+            }
+
+            50% {
+                transform: translate(60px, 40px)
+            }
+        }
+
+        @keyframes floatOrb2 {
+
+            0%,
+            100% {
+                transform: translate(0, 0)
+            }
+
+            50% {
+                transform: translate(-50px, 60px)
+            }
+        }
+
+        .nav-glass {
+            background: rgba(5, 5, 8, 0.7);
+            backdrop-filter: blur(20px) saturate(150%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-glow {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            box-shadow: 0 10px 40px -10px rgba(99, 102, 241, 0.7);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-glow:hover {
+            transform: translateY(-2px) scale(1.01);
+            box-shadow: 0 20px 50px -10px rgba(99, 102, 241, 0.9);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #818cf8 0%, #c084fc 50%, #22d3ee 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .shimmer-badge {
+            position: relative;
+            overflow: hidden;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.25);
+        }
+
+        .shimmer-badge::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 60%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+            animation: shimmerSlide 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmerSlide {
+            0% {
+                left: -100%
+            }
+
+            50%,
+            100% {
+                left: 150%
+            }
+        }
+
+        .pulse-dot {
+            position: relative;
+        }
+
+        .pulse-dot::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            background: currentColor;
+            opacity: 0.3;
+            animation: pulseLive 2s ease-out infinite;
+        }
+
+        @keyframes pulseLive {
+            0% {
+                transform: scale(1);
+                opacity: 0.5
+            }
+
+            100% {
+                transform: scale(2.2);
+                opacity: 0
+            }
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 16px;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .feature-card:hover {
+            background: rgba(99, 102, 241, 0.08);
+            border-color: rgba(99, 102, 241, 0.3);
+            transform: translateY(-4px);
+        }
+
+        .quote-card {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.18) 0%, rgba(168, 85, 247, 0.12) 100%);
+            border: 1px solid rgba(99, 102, 241, 0.35);
+            border-radius: 28px;
+        }
+
+        .divider-glow {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.4), transparent);
         }
     </style>
 </head>
 
-<body class="bg-white">
+<body class="text-white">
 
-    <!-- Nav -->
-    <nav class="border-b border-gray-100 px-6 py-4 flex items-center justify-between">
-        <a href="/" class="flex items-center gap-3">
-            <div class="w-9 h-9 bg-indigo-600 rounded-xl flex items-center justify-center">
-                <i class="fa-solid fa-brain text-white text-sm"></i>
+    <div class="aurora-bg"></div>
+    <div class="grid-overlay"></div>
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+
+    <div style="position:relative;z-index:10">
+
+        <!-- NAV -->
+        <nav class="nav-glass fixed top-0 left-0 right-0 z-50">
+            <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+                <a href="/" class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl flex items-center justify-center"
+                        style="background:linear-gradient(135deg,#6366f1,#a855f7);box-shadow:0 0 20px rgba(99,102,241,0.5)">
+                        <i class="fa-solid fa-brain text-white text-sm"></i>
+                    </div>
+                    <span class="font-bold text-white text-xl">NexaOps</span>
+                </a>
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="/" class="text-sm text-gray-400 hover:text-white transition">Home</a>
+                    <a href="{% url 'pricing_page' %}"
+                        class="text-sm text-gray-400 hover:text-white transition">Pricing</a>
+                    <a href="{% url 'landing_contact' %}"
+                        class="text-sm text-gray-400 hover:text-white transition">Contact</a>
+                </div>
+                <a href="{% url 'account_signup' %}"
+                    class="btn-glow text-white px-4 py-2 rounded-xl text-sm font-semibold">
+                    Get started free
+                </a>
             </div>
-            <span class="font-bold text-gray-900 text-xl">NexaOps</span>
-        </a>
-        <a href="{% url 'account_signup' %}"
-            class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-indigo-700 transition">
-            Get started free
-        </a>
-    </nav>
+        </nav>
 
-    <div class="max-w-3xl mx-auto px-6 py-20">
-        <div class="text-center mb-16">
-            <h1 class="text-5xl font-black text-gray-900 mb-4">About NexaOps</h1>
-            <p class="text-xl text-gray-500 leading-relaxed">We are building the operating system for modern businesses
-                — powered by AI.</p>
+        <!-- HERO -->
+        <div class="text-center pt-40 pb-16 px-6">
+            <div class="shimmer-badge inline-flex items-center gap-2 text-indigo-300 text-xs font-semibold px-4 py-2 rounded-full mb-8"
+                data-aos="fade-down">
+                <span class="w-2 h-2 bg-indigo-400 rounded-full pulse-dot text-indigo-400"></span>
+                Our story
+            </div>
+            <h1 class="text-4xl lg:text-6xl font-black mb-4 leading-tight" data-aos="fade-up" data-aos-delay="100">
+                About <span class="gradient-text">NexaOps</span>
+            </h1>
+            <p class="text-gray-400 text-lg max-w-xl mx-auto" data-aos="fade-up" data-aos-delay="200">
+                We are building the operating system for modern businesses — powered by AI.
+            </p>
         </div>
 
-        <div class="prose prose-lg max-w-none">
-            <div class="bg-indigo-50 rounded-3xl p-8 mb-10 text-center">
-                <p class="text-2xl font-bold text-indigo-900 leading-relaxed">
-                    "Every company deserves enterprise-grade AI tools, not just Fortune 500 companies."
+        <div class="max-w-4xl mx-auto px-6 pb-24">
+
+            <!-- Quote block -->
+            <div class="quote-card p-10 mb-16 text-center" data-aos="fade-up">
+                <i class="fa-solid fa-quote-left text-indigo-400 text-3xl mb-4 block"></i>
+                <p class="text-2xl font-bold text-white leading-relaxed">
+                    Every company deserves enterprise-grade AI tools, not just Fortune 500 companies.
                 </p>
             </div>
 
-            <h2 class="text-2xl font-bold text-gray-900 mb-4">Our Mission</h2>
-            <p class="text-gray-600 leading-relaxed mb-6">
-                NexaOps was built to give every business — from a 3-person startup to a 500-person enterprise — access
-                to the same AI-powered productivity tools. We believe that managing tasks, employees, meetings, and
-                documents should be simple, intelligent, and beautiful.
-            </p>
-
-            <h2 class="text-2xl font-bold text-gray-900 mb-4">What we built</h2>
-            <div class="grid grid-cols-2 gap-4 mb-8">
-                <div class="flex items-center gap-2 text-gray-700 text-sm"><i class="fa-solid fa-check text-green-500 flex-shrink-0"></i> Task Management</div>
-                <div class="flex items-center gap-2 text-gray-700 text-sm"><i class="fa-solid fa-check text-green-500 flex-shrink-0"></i> Project Tracking</div>
-                <div class="flex items-center gap-2 text-gray-700 text-sm"><i class="fa-solid fa-check text-green-500 flex-shrink-0"></i> Employee HR</div>
-                <div class="flex items-center gap-2 text-gray-700 text-sm"><i class="fa-solid fa-check text-green-500 flex-shrink-0"></i> Meeting Manager</div>
-                <div class="flex items-center gap-2 text-gray-700 text-sm"><i class="fa-solid fa-check text-green-500 flex-shrink-0"></i> Document Hub</div>
-                <div class="flex items-center gap-2 text-gray-700 text-sm"><i class="fa-solid fa-check text-green-500 flex-shrink-0"></i> AI Assistant</div>
-                <div class="flex items-center gap-2 text-gray-700 text-sm"><i class="fa-solid fa-check text-green-500 flex-shrink-0"></i> Analytics Dashboard</div>
-                <div class="flex items-center gap-2 text-gray-700 text-sm"><i class="fa-solid fa-check text-green-500 flex-shrink-0"></i> Smart Notifications</div>
+            <!-- Mission -->
+            <div class="mb-16" data-aos="fade-up">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center"
+                        style="background:rgba(99,102,241,0.15)">
+                        <i class="fa-solid fa-bullseye text-indigo-400 text-sm"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-white">Our Mission</h2>
+                </div>
+                <div class="divider-glow mb-6"></div>
+                <p class="text-gray-400 leading-relaxed text-base">
+                    NexaOps was built to give every business — from a 3-person startup to a 500-person enterprise —
+                    access
+                    to the same AI-powered productivity tools. We believe that managing tasks, employees, meetings, and
+                    documents should be simple, intelligent, and beautiful.
+                </p>
             </div>
 
-            <div class="text-center">
-                <a href="{% url 'account_signup' %}"
-                    class="inline-flex items-center gap-2 bg-indigo-600 text-white px-8 py-4 rounded-2xl font-bold hover:bg-indigo-700 transition">
-                    <i class="fa-solid fa-rocket"></i> Try NexaOps free
-                </a>
+            <!-- What we built -->
+            <div class="mb-16" data-aos="fade-up">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center"
+                        style="background:rgba(168,85,247,0.15)">
+                        <i class="fa-solid fa-layer-group text-purple-400 text-sm"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-white">What We Built</h2>
+                </div>
+                <div class="divider-glow mb-8"></div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="feature-card p-5 text-center">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3"
+                            style="background:rgba(99,102,241,0.15)">
+                            <i class="fa-solid fa-list-check text-indigo-400"></i>
+                        </div>
+                        <p class="text-sm font-semibold text-white">Task Management</p>
+                    </div>
+                    <div class="feature-card p-5 text-center">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3"
+                            style="background:rgba(168,85,247,0.15)">
+                            <i class="fa-solid fa-diagram-project text-purple-400"></i>
+                        </div>
+                        <p class="text-sm font-semibold text-white">Project Tracking</p>
+                    </div>
+                    <div class="feature-card p-5 text-center">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3"
+                            style="background:rgba(34,211,238,0.1)">
+                            <i class="fa-solid fa-users text-cyan-400"></i>
+                        </div>
+                        <p class="text-sm font-semibold text-white">Employee HR</p>
+                    </div>
+                    <div class="feature-card p-5 text-center">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3"
+                            style="background:rgba(245,158,11,0.15)">
+                            <i class="fa-solid fa-calendar-days text-amber-400"></i>
+                        </div>
+                        <p class="text-sm font-semibold text-white">Meeting Manager</p>
+                    </div>
+                    <div class="feature-card p-5 text-center">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3"
+                            style="background:rgba(16,185,129,0.15)">
+                            <i class="fa-solid fa-folder-open text-emerald-400"></i>
+                        </div>
+                        <p class="text-sm font-semibold text-white">Document Hub</p>
+                    </div>
+                    <div class="feature-card p-5 text-center">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3"
+                            style="background:rgba(99,102,241,0.15)">
+                            <i class="fa-solid fa-robot text-indigo-400"></i>
+                        </div>
+                        <p class="text-sm font-semibold text-white">AI Assistant</p>
+                    </div>
+                    <div class="feature-card p-5 text-center">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3"
+                            style="background:rgba(168,85,247,0.15)">
+                            <i class="fa-solid fa-chart-line text-purple-400"></i>
+                        </div>
+                        <p class="text-sm font-semibold text-white">Analytics Dashboard</p>
+                    </div>
+                    <div class="feature-card p-5 text-center">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3"
+                            style="background:rgba(245,158,11,0.15)">
+                            <i class="fa-solid fa-bell text-amber-400"></i>
+                        </div>
+                        <p class="text-sm font-semibold text-white">Smart Notifications</p>
+                    </div>
+                </div>
             </div>
+
+            <!-- CTA -->
+            <div class="text-center" data-aos="zoom-in">
+                <div class="glass-card inline-flex flex-col items-center px-12 py-10 rounded-[40px]"
+                    style="border-color:rgba(99,102,241,0.3);background:linear-gradient(135deg,rgba(99,102,241,0.1),rgba(168,85,247,0.06))">
+                    <h3 class="text-2xl font-black text-white mb-2">Ready to get started?</h3>
+                    <p class="text-gray-400 text-sm mb-6">Join thousands of teams already using NexaOps.</p>
+                    <a href="{% url 'account_signup' %}"
+                        class="btn-glow text-white px-8 py-3 rounded-2xl font-bold flex items-center gap-2">
+                        <i class="fa-solid fa-rocket"></i> Try NexaOps free
+                    </a>
+                </div>
+            </div>
+
         </div>
+
+        <!-- FOOTER -->
+        <footer class="border-t mt-8 py-8 text-center text-sm" style="border-color:rgba(255,255,255,0.06)">
+            <p class="text-gray-500">© 2026 NexaOps ·
+                <a href="/" class="hover:text-white transition">Home</a> ·
+                <a href="{% url 'landing_contact' %}" class="hover:text-white transition">Contact</a> ·
+                <a href="{% url 'pricing_page' %}" class="hover:text-white transition">Pricing</a>
+            </p>
+        </footer>
+
     </div>
 
-    <!-- Footer -->
-    <footer class="border-t border-gray-100 py-8 text-center text-gray-400 text-sm">
-        <p>© 2026 NexaOps · <a href="/" class="hover:text-gray-600">Home</a> · <a href="{% url 'landing_contact' %}"
-                class="hover:text-gray-600">Contact</a> · <a href="{% url 'pricing_page' %}"
-                class="hover:text-gray-600">Pricing</a></p>
-    </footer>
-
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({ duration: 700, easing: 'ease-out-cubic', once: true, offset: 50 });
+    </script>
 </body>
 
 </html>

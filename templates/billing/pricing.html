@@ -7,255 +7,680 @@
     <title>Pricing — NexaOps</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
         rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Inter', sans-serif
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            background: #050508;
+        }
+
+        .aurora-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background:
+                radial-gradient(ellipse 80% 50% at 20% -10%, rgba(99, 102, 241, 0.22), transparent),
+                radial-gradient(ellipse 60% 50% at 90% 10%, rgba(168, 85, 247, 0.18), transparent),
+                radial-gradient(ellipse 60% 50% at 50% 100%, rgba(34, 211, 238, 0.1), transparent),
+                #050508;
+            animation: auroraShift 18s ease-in-out infinite;
+        }
+
+        @keyframes auroraShift {
+
+            0%,
+            100% {
+                filter: hue-rotate(0deg) brightness(1);
+            }
+
+            50% {
+                filter: hue-rotate(20deg) brightness(1.08);
+            }
+        }
+
+        .grid-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+            background-size: 60px 60px;
+            mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 80%);
+        }
+
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.4;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .orb1 {
+            width: 450px;
+            height: 450px;
+            background: radial-gradient(circle, #6366f1, transparent 70%);
+            top: -150px;
+            left: -100px;
+            animation: floatOrb1 14s ease-in-out infinite;
+        }
+
+        .orb2 {
+            width: 380px;
+            height: 380px;
+            background: radial-gradient(circle, #a855f7, transparent 70%);
+            bottom: -120px;
+            right: -100px;
+            animation: floatOrb2 16s ease-in-out infinite;
+        }
+
+        @keyframes floatOrb1 {
+
+            0%,
+            100% {
+                transform: translate(0, 0)
+            }
+
+            50% {
+                transform: translate(60px, 40px)
+            }
+        }
+
+        @keyframes floatOrb2 {
+
+            0%,
+            100% {
+                transform: translate(0, 0)
+            }
+
+            50% {
+                transform: translate(-50px, 60px)
+            }
+        }
+
+        .nav-glass {
+            background: rgba(5, 5, 8, 0.7);
+            backdrop-filter: blur(20px) saturate(150%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-glow {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            box-shadow: 0 10px 40px -10px rgba(99, 102, 241, 0.7);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-glow:hover {
+            transform: translateY(-2px) scale(1.01);
+            box-shadow: 0 20px 50px -10px rgba(99, 102, 241, 0.9);
+        }
+
+        .plan-card {
+            border-radius: 28px;
+            padding: 32px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .plan-card:hover {
+            transform: translateY(-8px);
+        }
+
+        .plan-free {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .plan-free:hover {
+            border-color: rgba(99, 102, 241, 0.3);
+            box-shadow: 0 30px 60px -20px rgba(99, 102, 241, 0.2);
+        }
+
+        .plan-pro {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.3) 0%, rgba(168, 85, 247, 0.2) 100%);
+            border: 1px solid rgba(99, 102, 241, 0.5);
+            box-shadow: 0 20px 60px -20px rgba(99, 102, 241, 0.5);
+        }
+
+        .plan-pro:hover {
+            box-shadow: 0 40px 80px -20px rgba(99, 102, 241, 0.7);
+        }
+
+        .plan-enterprise {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .plan-enterprise:hover {
+            border-color: rgba(148, 163, 184, 0.3);
+            box-shadow: 0 30px 60px -20px rgba(148, 163, 184, 0.15);
+        }
+
+        .feature-check {
+            color: #818cf8;
+        }
+
+        .feature-cross {
+            color: rgba(255, 255, 255, 0.2);
+        }
+
+        .faq-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .faq-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(99, 102, 241, 0.25);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #818cf8 0%, #c084fc 50%, #22d3ee 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .shimmer-badge {
+            position: relative;
+            overflow: hidden;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.25);
+        }
+
+        .shimmer-badge::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 60%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+            animation: shimmerSlide 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmerSlide {
+            0% {
+                left: -100%
+            }
+
+            50%,
+            100% {
+                left: 150%
+            }
+        }
+
+        .divider-glow {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.4), transparent);
+        }
+
+        .pulse-dot {
+            position: relative;
+        }
+
+        .pulse-dot::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            background: currentColor;
+            opacity: 0.3;
+            animation: pulseLive 2s ease-out infinite;
+        }
+
+        @keyframes pulseLive {
+            0% {
+                transform: scale(1);
+                opacity: 0.5
+            }
+
+            100% {
+                transform: scale(2.2);
+                opacity: 0
+            }
         }
     </style>
 </head>
 
-<body class="bg-gray-50">
+<body class="text-white">
 
-    <!-- Navbar -->
-    <nav class="bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-            <div class="w-9 h-9 bg-indigo-600 rounded-xl flex items-center justify-center">
-                <i class="fa-solid fa-brain text-white text-sm"></i>
+    <div class="aurora-bg"></div>
+    <div class="grid-overlay"></div>
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+
+    <div style="position:relative;z-index:10">
+
+        <!-- NAV -->
+        <nav class="nav-glass fixed top-0 left-0 right-0 z-50">
+            <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+                <a href="/" class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl flex items-center justify-center"
+                        style="background:linear-gradient(135deg,#6366f1,#a855f7);box-shadow:0 0 20px rgba(99,102,241,0.5)">
+                        <i class="fa-solid fa-brain text-white text-sm"></i>
+                    </div>
+                    <span class="font-bold text-white text-xl">NexaOps</span>
+                </a>
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="/" class="text-sm text-gray-400 hover:text-white transition">Home</a>
+                    <a href="{% url 'landing_about' %}"
+                        class="text-sm text-gray-400 hover:text-white transition">About</a>
+                    <a href="{% url 'landing_contact' %}"
+                        class="text-sm text-gray-400 hover:text-white transition">Contact</a>
+                </div>
+                <div class="flex items-center gap-3">
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'billing_dashboard' %}" class="text-sm text-gray-400 hover:text-white transition">My
+                        Billing</a>
+                    <a href="{% url 'analytics_dashboard' %}"
+                        class="btn-glow text-white px-4 py-2 rounded-xl text-sm font-semibold">Dashboard</a>
+                    {% else %}
+                    <a href="{% url 'account_login' %}" class="text-sm text-gray-400 hover:text-white transition">Sign
+                        in</a>
+                    <a href="{% url 'account_signup' %}"
+                        class="btn-glow text-white px-4 py-2 rounded-xl text-sm font-semibold">Get started</a>
+                    {% endif %}
+                </div>
             </div>
-            <span class="font-bold text-gray-900 text-lg">NexaOps</span>
-        </div>
-        <div class="flex items-center gap-3">
-            {% if user.is_authenticated %}
-            <a href="{% url 'billing_dashboard' %}" class="text-sm text-gray-600 hover:text-gray-900">My Billing</a>
-            <a href="{% url 'analytics_dashboard' %}"
-                class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-indigo-700 transition">Dashboard</a>
-            {% else %}
-            <a href="{% url 'account_login' %}" class="text-sm text-gray-600 hover:text-gray-900">Sign in</a>
-            <a href="{% url 'account_signup' %}"
-                class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-indigo-700 transition">Get
-                started</a>
-            {% endif %}
-        </div>
-    </nav>
+        </nav>
 
-    <!-- Hero -->
-    <div class="text-center py-16 px-4">
-        <div
-            class="inline-flex items-center gap-2 bg-indigo-50 text-indigo-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-6">
-            <i class="fa-solid fa-robot"></i> AI-Powered Business Platform
+        <!-- HERO -->
+        <div class="text-center pt-40 pb-16 px-6">
+            <div class="shimmer-badge inline-flex items-center gap-2 text-indigo-300 text-xs font-semibold px-4 py-2 rounded-full mb-8"
+                data-aos="fade-down">
+                <span class="w-2 h-2 bg-indigo-400 rounded-full pulse-dot text-indigo-400"></span>
+                Simple, transparent pricing
+            </div>
+            <h1 class="text-4xl lg:text-6xl font-black mb-4 leading-tight" data-aos="fade-up" data-aos-delay="100">
+                Invest in your team's <span class="gradient-text">productivity</span>
+            </h1>
+            <p class="text-gray-400 text-lg max-w-xl mx-auto mb-6" data-aos="fade-up" data-aos-delay="200">
+                Start free, upgrade when you grow. No hidden fees. Cancel anytime.
+            </p>
+
+            <!-- Billing toggle placeholder -->
+            <div class="inline-flex items-center gap-3 glass-card px-4 py-2 rounded-2xl text-sm mb-12"
+                data-aos="fade-up" data-aos-delay="300">
+                <span class="text-white font-semibold">Monthly</span>
+                <span class="text-gray-500 text-xs px-2 py-0.5 rounded-full"
+                    style="background:rgba(16,185,129,0.15);color:#6ee7b7">Save 20% yearly</span>
+            </div>
         </div>
-        <h1 class="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">Simple, transparent pricing</h1>
-        <p class="text-gray-500 text-lg max-w-xl mx-auto">Start free, upgrade when you grow. No hidden fees. Cancel
-            anytime.</p>
+
+        <!-- PLAN CARDS -->
+        <div class="max-w-5xl mx-auto px-4 pb-20">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-20">
+
+                <!-- FREE -->
+                <div class="plan-card plan-free" data-aos="fade-up" data-aos-delay="0">
+                    <div class="mb-6">
+                        <div class="w-11 h-11 rounded-2xl flex items-center justify-center mb-4"
+                            style="background:rgba(255,255,255,0.07)">
+                            <i class="fa-solid fa-seedling text-gray-400"></i>
+                        </div>
+                        <h2 class="text-xl font-bold text-white">Starter</h2>
+                        <p class="text-gray-500 text-sm mt-1">Perfect to get started</p>
+                        <div class="mt-5 flex items-end gap-1">
+                            <span class="text-5xl font-black text-white">$0</span>
+                            <span class="text-gray-500 text-sm mb-2">/month</span>
+                        </div>
+                        <p class="text-xs text-gray-600 mt-1">Free forever</p>
+                    </div>
+
+                    <div class="space-y-3 mb-7">
+                        <div class="flex items-center gap-3 text-sm text-gray-300">
+                            <i class="fa-solid fa-check feature-check text-xs w-4 flex-shrink-0"></i>Up to 3 users
+                        </div>
+                        <div class="flex items-center gap-3 text-sm text-gray-300">
+                            <i class="fa-solid fa-check feature-check text-xs w-4 flex-shrink-0"></i>5 projects
+                        </div>
+                        <div class="flex items-center gap-3 text-sm text-gray-300">
+                            <i class="fa-solid fa-check feature-check text-xs w-4 flex-shrink-0"></i>Basic task
+                            management
+                        </div>
+                        <div class="flex items-center gap-3 text-sm text-gray-300">
+                            <i class="fa-solid fa-check feature-check text-xs w-4 flex-shrink-0"></i>1 GB storage
+                        </div>
+                        <div class="flex items-center gap-3 text-sm text-gray-300">
+                            <i class="fa-solid fa-check feature-check text-xs w-4 flex-shrink-0"></i>10 AI calls/month
+                        </div>
+                        <div class="flex items-center gap-3 text-sm" style="color:rgba(255,255,255,0.2)">
+                            <i class="fa-solid fa-xmark feature-cross text-xs w-4 flex-shrink-0"></i>Analytics dashboard
+                        </div>
+                        <div class="flex items-center gap-3 text-sm" style="color:rgba(255,255,255,0.2)">
+                            <i class="fa-solid fa-xmark feature-cross text-xs w-4 flex-shrink-0"></i>Priority support
+                        </div>
+                    </div>
+
+                    {% if user.is_authenticated %}
+                    {% if user.subscription.plan == 'free' %}
+                    <div class="w-full text-center py-3 rounded-2xl text-sm font-semibold text-gray-500"
+                        style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08)">
+                        ✓ Current Plan
+                    </div>
+                    {% else %}
+                    <a href="{% url 'billing_dashboard' %}"
+                        class="block w-full text-center py-3 rounded-2xl text-sm font-semibold text-gray-400 transition"
+                        style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08)">
+                        Manage Plan
+                    </a>
+                    {% endif %}
+                    {% else %}
+                    <a href="{% url 'account_signup' %}"
+                        class="block w-full text-center py-3 rounded-2xl text-sm font-semibold text-gray-300 hover:text-white transition"
+                        style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1)">
+                        Get started free
+                    </a>
+                    {% endif %}
+                </div>
+
+                <!-- PRO -->
+                <div class="plan-card plan-pro" data-aos="fade-up" data-aos-delay="100">
+                    <!-- Popular badge -->
+                    <div class="absolute top-5 right-5 text-xs font-bold px-3 py-1.5 rounded-full text-white"
+                        style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2)">
+                        ⭐ Most Popular
+                    </div>
+                    <!-- Glow blob -->
+                    <div class="absolute -top-20 -right-20 w-60 h-60 rounded-full pointer-events-none"
+                        style="background:radial-gradient(circle,rgba(99,102,241,0.3),transparent 70%);filter:blur(40px)">
+                    </div>
+
+                    <div class="mb-6 relative">
+                        <div class="w-11 h-11 rounded-2xl flex items-center justify-center mb-4"
+                            style="background:rgba(255,255,255,0.2)">
+                            <i class="fa-solid fa-rocket text-white"></i>
+                        </div>
+                        <h2 class="text-xl font-bold text-white">Pro</h2>
+                        <p class="text-indigo-200 text-sm mt-1">For growing teams</p>
+                        <div class="mt-5 flex items-end gap-1">
+                            <span class="text-5xl font-black text-white">$29</span>
+                            <span class="text-indigo-200 text-sm mb-2">/month</span>
+                        </div>
+                        <p class="text-xs text-indigo-300 mt-1">Per workspace, billed monthly</p>
+                    </div>
+
+                    <div class="space-y-3 mb-7 relative">
+                        <div class="flex items-center gap-3 text-sm text-white"><i
+                                class="fa-solid fa-check text-xs w-4 flex-shrink-0" style="color:#a5b4fc"></i>Up to 25
+                            users</div>
+                        <div class="flex items-center gap-3 text-sm text-white"><i
+                                class="fa-solid fa-check text-xs w-4 flex-shrink-0" style="color:#a5b4fc"></i>Unlimited
+                            projects</div>
+                        <div class="flex items-center gap-3 text-sm text-white"><i
+                                class="fa-solid fa-check text-xs w-4 flex-shrink-0" style="color:#a5b4fc"></i>Full task
+                            & project management</div>
+                        <div class="flex items-center gap-3 text-sm text-white"><i
+                                class="fa-solid fa-check text-xs w-4 flex-shrink-0" style="color:#a5b4fc"></i>50 GB
+                            storage</div>
+                        <div class="flex items-center gap-3 text-sm text-white"><i
+                                class="fa-solid fa-check text-xs w-4 flex-shrink-0" style="color:#a5b4fc"></i>500 AI
+                            calls/month</div>
+                        <div class="flex items-center gap-3 text-sm text-white"><i
+                                class="fa-solid fa-check text-xs w-4 flex-shrink-0" style="color:#a5b4fc"></i>Full
+                            analytics dashboard</div>
+                        <div class="flex items-center gap-3 text-sm text-white"><i
+                                class="fa-solid fa-check text-xs w-4 flex-shrink-0" style="color:#a5b4fc"></i>Google &
+                            Microsoft login</div>
+                        <div class="flex items-center gap-3 text-sm text-white"><i
+                                class="fa-solid fa-check text-xs w-4 flex-shrink-0" style="color:#a5b4fc"></i>Priority
+                            email support</div>
+                    </div>
+
+                    {% if user.is_authenticated %}
+                    {% if user.subscription.plan == 'pro' %}
+                    <div class="w-full text-center bg-white/20 text-white py-3 rounded-2xl text-sm font-bold">
+                        ✓ Current Plan
+                    </div>
+                    {% else %}
+                    <a href="{% url 'create_checkout' 'pro' %}"
+                        class="block w-full text-center bg-white text-indigo-700 hover:bg-indigo-50 py-3 rounded-2xl text-sm font-bold transition">
+                        Upgrade to Pro →
+                    </a>
+                    {% endif %}
+                    {% else %}
+                    <a href="{% url 'account_signup' %}"
+                        class="block w-full text-center bg-white text-indigo-700 hover:bg-indigo-50 py-3 rounded-2xl text-sm font-bold transition">
+                        Get started →
+                    </a>
+                    {% endif %}
+                </div>
+
+                <!-- ENTERPRISE -->
+                <div class="plan-card plan-enterprise" data-aos="fade-up" data-aos-delay="200">
+                    <div class="mb-6">
+                        <div class="w-11 h-11 rounded-2xl flex items-center justify-center mb-4"
+                            style="background:linear-gradient(135deg,#1e293b,#334155)">
+                            <i class="fa-solid fa-building-columns text-white text-sm"></i>
+                        </div>
+                        <h2 class="text-xl font-bold text-white">Enterprise</h2>
+                        <p class="text-gray-500 text-sm mt-1">For large organizations</p>
+                        <div class="mt-5 flex items-end gap-1">
+                            <span class="text-5xl font-black text-white">$99</span>
+                            <span class="text-gray-500 text-sm mb-2">/month</span>
+                        </div>
+                        <p class="text-xs text-gray-600 mt-1">Per workspace, billed monthly</p>
+                    </div>
+
+                    <div class="space-y-3 mb-7">
+                        <div class="flex items-center gap-3 text-sm text-gray-300"><i
+                                class="fa-solid fa-check feature-check text-xs w-4 flex-shrink-0"></i>Unlimited users
+                        </div>
+                        <div class="flex items-center gap-3 text-sm text-gray-300"><i
+                                class="fa-solid fa-check feature-check text-xs w-4 flex-shrink-0"></i>Unlimited projects
+                        </div>
+                        <div class="flex items-center gap-3 text-sm text-gray-300"><i
+                                class="fa-solid fa-check feature-check text-xs w-4 flex-shrink-0"></i>Everything in Pro
+                        </div>
+                        <div class="flex items-center gap-3 text-sm text-gray-300"><i
+                                class="fa-solid fa-check feature-check text-xs w-4 flex-shrink-0"></i>Unlimited storage
+                        </div>
+                        <div class="flex items-center gap-3 text-sm text-gray-300"><i
+                                class="fa-solid fa-check feature-check text-xs w-4 flex-shrink-0"></i>9,999 AI
+                            calls/month</div>
+                        <div class="flex items-center gap-3 text-sm text-gray-300"><i
+                                class="fa-solid fa-check feature-check text-xs w-4 flex-shrink-0"></i>Custom AI chatbot
+                        </div>
+                        <div class="flex items-center gap-3 text-sm text-gray-300"><i
+                                class="fa-solid fa-check feature-check text-xs w-4 flex-shrink-0"></i>SSO / SAML login
+                        </div>
+                        <div class="flex items-center gap-3 text-sm text-gray-300"><i
+                                class="fa-solid fa-check feature-check text-xs w-4 flex-shrink-0"></i>Dedicated support
+                        </div>
+                    </div>
+
+                    {% if user.is_authenticated %}
+                    {% if user.subscription.plan == 'enterprise' %}
+                    <div class="w-full text-center py-3 rounded-2xl text-sm font-semibold text-gray-400"
+                        style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08)">
+                        ✓ Current Plan
+                    </div>
+                    {% else %}
+                    <a href="{% url 'create_checkout' 'enterprise' %}"
+                        class="block w-full text-center py-3 rounded-2xl text-sm font-bold text-white transition"
+                        style="background:linear-gradient(135deg,#1e293b,#334155);border:1px solid rgba(148,163,184,0.2)">
+                        Upgrade to Enterprise →
+                    </a>
+                    {% endif %}
+                    {% else %}
+                    <a href="{% url 'account_signup' %}"
+                        class="block w-full text-center py-3 rounded-2xl text-sm font-bold text-white transition"
+                        style="background:linear-gradient(135deg,#1e293b,#334155);border:1px solid rgba(148,163,184,0.2)">
+                        Get started →
+                    </a>
+                    {% endif %}
+                </div>
+
+            </div>
+
+            <!-- Feature comparison strip -->
+            <div class="glass-card rounded-3xl p-8 mb-16" data-aos="fade-up">
+                <h3 class="text-center text-lg font-bold text-white mb-6">Everything included in every plan</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="text-center p-4">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3"
+                            style="background:rgba(99,102,241,0.15)">
+                            <i class="fa-solid fa-list-check text-indigo-400"></i>
+                        </div>
+                        <p class="text-sm font-semibold text-white">Task Management</p>
+                        <p class="text-xs text-gray-500 mt-1">Kanban + List view</p>
+                    </div>
+                    <div class="text-center p-4">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3"
+                            style="background:rgba(168,85,247,0.15)">
+                            <i class="fa-solid fa-robot text-purple-400"></i>
+                        </div>
+                        <p class="text-sm font-semibold text-white">AI Tools</p>
+                        <p class="text-xs text-gray-500 mt-1">6 AI-powered features</p>
+                    </div>
+                    <div class="text-center p-4">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3"
+                            style="background:rgba(16,185,129,0.15)">
+                            <i class="fa-solid fa-shield-halved text-emerald-400"></i>
+                        </div>
+                        <p class="text-sm font-semibold text-white">SSL Security</p>
+                        <p class="text-xs text-gray-500 mt-1">Enterprise-grade</p>
+                    </div>
+                    <div class="text-center p-4">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3"
+                            style="background:rgba(245,158,11,0.15)">
+                            <i class="fa-solid fa-bell text-amber-400"></i>
+                        </div>
+                        <p class="text-sm font-semibold text-white">Notifications</p>
+                        <p class="text-xs text-gray-500 mt-1">Email + in-app</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trust badges -->
+            <div class="text-center mb-16" data-aos="fade-up">
+                <div class="flex flex-wrap items-center justify-center gap-8 text-gray-600">
+                    <span class="flex items-center gap-2 text-sm"><i class="fa-solid fa-lock text-emerald-500"></i>
+                        Secured by Stripe</span>
+                    <span class="flex items-center gap-2 text-sm"><i
+                            class="fa-solid fa-rotate-left text-indigo-400"></i> Cancel anytime</span>
+                    <span class="flex items-center gap-2 text-sm"><i
+                            class="fa-solid fa-shield-halved text-indigo-400"></i> No credit card to start</span>
+                    <span class="flex items-center gap-2 text-sm"><i class="fa-solid fa-clock text-amber-400"></i>
+                        2-minute setup</span>
+                </div>
+            </div>
+
+            <!-- FAQ -->
+            <div class="max-w-2xl mx-auto" data-aos="fade-up">
+                <h2 class="text-3xl font-black text-center text-white mb-2">Frequently asked questions</h2>
+                <p class="text-gray-500 text-center text-sm mb-8">Everything you need to know before upgrading</p>
+                <div class="space-y-3">
+                    <div class="faq-item p-5 cursor-pointer" onclick="toggleFaq(this)">
+                        <div class="flex items-center justify-between">
+                            <p class="font-semibold text-white text-sm">Can I cancel anytime?</p>
+                            <i class="fa-solid fa-chevron-down text-gray-500 text-xs transition-transform faq-icon"></i>
+                        </div>
+                        <p class="text-gray-400 text-sm mt-3 leading-relaxed hidden faq-answer">Yes. Cancel anytime from
+                            your billing dashboard. You keep Pro access until the end of your billing period. No
+                            questions asked.</p>
+                    </div>
+                    <div class="faq-item p-5 cursor-pointer" onclick="toggleFaq(this)">
+                        <div class="flex items-center justify-between">
+                            <p class="font-semibold text-white text-sm">Is there a free trial?</p>
+                            <i class="fa-solid fa-chevron-down text-gray-500 text-xs transition-transform faq-icon"></i>
+                        </div>
+                        <p class="text-gray-400 text-sm mt-3 leading-relaxed hidden faq-answer">The Starter plan is free
+                            forever with no time limit. You can upgrade to Pro anytime when you need more features, more
+                            users, or more AI calls.</p>
+                    </div>
+                    <div class="faq-item p-5 cursor-pointer" onclick="toggleFaq(this)">
+                        <div class="flex items-center justify-between">
+                            <p class="font-semibold text-white text-sm">What payment methods do you accept?</p>
+                            <i class="fa-solid fa-chevron-down text-gray-500 text-xs transition-transform faq-icon"></i>
+                        </div>
+                        <p class="text-gray-400 text-sm mt-3 leading-relaxed hidden faq-answer">We accept all major
+                            credit and debit cards via Stripe — Visa, Mastercard, Amex, and more. Your payment
+                            information is never stored on our servers.</p>
+                    </div>
+                    <div class="faq-item p-5 cursor-pointer" onclick="toggleFaq(this)">
+                        <div class="flex items-center justify-between">
+                            <p class="font-semibold text-white text-sm">Can I switch between plans?</p>
+                            <i class="fa-solid fa-chevron-down text-gray-500 text-xs transition-transform faq-icon"></i>
+                        </div>
+                        <p class="text-gray-400 text-sm mt-3 leading-relaxed hidden faq-answer">Yes. Upgrade or
+                            downgrade anytime. Upgrades take effect immediately. Downgrades take effect at the end of
+                            the current billing period.</p>
+                    </div>
+                    <div class="faq-item p-5 cursor-pointer" onclick="toggleFaq(this)">
+                        <div class="flex items-center justify-between">
+                            <p class="font-semibold text-white text-sm">What are AI calls?</p>
+                            <i class="fa-solid fa-chevron-down text-gray-500 text-xs transition-transform faq-icon"></i>
+                        </div>
+                        <p class="text-gray-400 text-sm mt-3 leading-relaxed hidden faq-answer">Each time you use an AI
+                            feature — writing an email, generating a standup, running smart search, or detecting risks —
+                            that counts as one AI call. Counts reset every month.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CTA bottom -->
+            <div class="text-center mt-20" data-aos="zoom-in">
+                <div class="glass-card inline-flex flex-col items-center px-12 py-10 rounded-[40px]"
+                    style="border-color:rgba(99,102,241,0.3);background:linear-gradient(135deg,rgba(99,102,241,0.1),rgba(168,85,247,0.06))">
+                    <h3 class="text-2xl font-black text-white mb-2">Still have questions?</h3>
+                    <p class="text-gray-400 text-sm mb-6">We're happy to help. Reach out to our team anytime.</p>
+                    <a href="{% url 'landing_contact' %}"
+                        class="btn-glow text-white px-6 py-3 rounded-xl text-sm font-bold flex items-center gap-2">
+                        <i class="fa-solid fa-paper-plane"></i> Contact us
+                    </a>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="border-t mt-20 py-8 text-center text-sm" style="border-color:rgba(255,255,255,0.06)">
+            <p class="text-gray-500">© 2026 NexaOps ·
+                <a href="/" class="hover:text-white transition">Home</a> ·
+                <a href="{% url 'landing_about' %}" class="hover:text-white transition">About</a> ·
+                <a href="{% url 'landing_contact' %}" class="hover:text-white transition">Contact</a>
+            </p>
+        </footer>
+
     </div>
 
-    <!-- Pricing cards -->
-    <div class="max-w-5xl mx-auto px-4 pb-20">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({ duration: 700, easing: 'ease-out-cubic', once: true, offset: 50 });
 
-            <!-- FREE -->
-            <div class="bg-white rounded-3xl border border-gray-200 p-7">
-                <div class="mb-6">
-                    <div class="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center mb-4">
-                        <i class="fa-solid fa-seedling text-gray-500"></i>
-                    </div>
-                    <h2 class="text-xl font-bold text-gray-900">Starter</h2>
-                    <p class="text-gray-500 text-sm mt-1">Perfect to get started</p>
-                    <div class="mt-4 flex items-end gap-1">
-                        <span class="text-4xl font-bold text-gray-900">$0</span>
-                        <span class="text-gray-400 text-sm mb-1">/month</span>
-                    </div>
-                </div>
-
-                <div class="space-y-3 mb-7">
-                    {% for feat in starter_features %}
-                    <div class="flex items-center gap-2 text-sm text-gray-600">
-                        <i class="fa-solid fa-check text-green-500 text-xs w-4"></i>{{ feat }}
-                    </div>
-                    {% empty %}
-                    <div class="flex items-center gap-2 text-sm text-gray-600"><i
-                            class="fa-solid fa-check text-green-500 text-xs w-4"></i>Up to 3 users</div>
-                    <div class="flex items-center gap-2 text-sm text-gray-600"><i
-                            class="fa-solid fa-check text-green-500 text-xs w-4"></i>5 projects</div>
-                    <div class="flex items-center gap-2 text-sm text-gray-600"><i
-                            class="fa-solid fa-check text-green-500 text-xs w-4"></i>Basic task management</div>
-                    <div class="flex items-center gap-2 text-sm text-gray-600"><i
-                            class="fa-solid fa-check text-green-500 text-xs w-4"></i>1 GB storage</div>
-                    <div class="flex items-center gap-2 text-sm text-gray-600"><i
-                            class="fa-solid fa-check text-green-500 text-xs w-4"></i>10 AI calls/month</div>
-                    <div class="flex items-center gap-2 text-sm text-gray-400"><i
-                            class="fa-solid fa-xmark text-red-300 text-xs w-4"></i>Analytics dashboard</div>
-                    <div class="flex items-center gap-2 text-sm text-gray-400"><i
-                            class="fa-solid fa-xmark text-red-300 text-xs w-4"></i>Priority support</div>
-                    {% endfor %}
-                </div>
-
-                {% if user.is_authenticated %}
-                {% if user.subscription.plan == 'free' %}
-                <div class="w-full text-center py-2.5 rounded-xl text-sm font-medium bg-gray-100 text-gray-500">
-                    Current Plan
-                </div>
-                {% else %}
-                <a href="{% url 'billing_dashboard' %}"
-                    class="block w-full text-center border border-gray-200 text-gray-600 hover:bg-gray-50 py-2.5 rounded-xl text-sm font-medium transition">
-                    Manage Plan
-                </a>
-                {% endif %}
-                {% else %}
-                <a href="{% url 'account_signup' %}"
-                    class="block w-full text-center border border-gray-200 text-gray-600 hover:bg-gray-50 py-2.5 rounded-xl text-sm font-medium transition">
-                    Get started free
-                </a>
-                {% endif %}
-            </div>
-
-            <!-- PRO — highlighted -->
-            <div class="bg-indigo-600 rounded-3xl p-7 relative overflow-hidden">
-                <div class="absolute top-4 right-4 bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full">
-                    Most Popular
-                </div>
-                <div class="mb-6">
-                    <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mb-4">
-                        <i class="fa-solid fa-rocket text-white"></i>
-                    </div>
-                    <h2 class="text-xl font-bold text-white">Pro</h2>
-                    <p class="text-indigo-200 text-sm mt-1">For growing teams</p>
-                    <div class="mt-4 flex items-end gap-1">
-                        <span class="text-4xl font-bold text-white">$29</span>
-                        <span class="text-indigo-200 text-sm mb-1">/month</span>
-                    </div>
-                </div>
-
-                <div class="space-y-3 mb-7">
-                    <div class="flex items-center gap-2 text-sm text-white"><i
-                            class="fa-solid fa-check text-indigo-200 text-xs w-4"></i>Up to 25 users</div>
-                    <div class="flex items-center gap-2 text-sm text-white"><i
-                            class="fa-solid fa-check text-indigo-200 text-xs w-4"></i>Unlimited projects</div>
-                    <div class="flex items-center gap-2 text-sm text-white"><i
-                            class="fa-solid fa-check text-indigo-200 text-xs w-4"></i>Full task & project management
-                    </div>
-                    <div class="flex items-center gap-2 text-sm text-white"><i
-                            class="fa-solid fa-check text-indigo-200 text-xs w-4"></i>50 GB storage</div>
-                    <div class="flex items-center gap-2 text-sm text-white"><i
-                            class="fa-solid fa-check text-indigo-200 text-xs w-4"></i>500 AI calls/month</div>
-                    <div class="flex items-center gap-2 text-sm text-white"><i
-                            class="fa-solid fa-check text-indigo-200 text-xs w-4"></i>Full analytics dashboard</div>
-                    <div class="flex items-center gap-2 text-sm text-white"><i
-                            class="fa-solid fa-check text-indigo-200 text-xs w-4"></i>Google & Microsoft login</div>
-                    <div class="flex items-center gap-2 text-sm text-white"><i
-                            class="fa-solid fa-check text-indigo-200 text-xs w-4"></i>Priority email support</div>
-                </div>
-
-                {% if user.is_authenticated %}
-                {% if user.subscription.plan == 'pro' %}
-                <div class="w-full text-center bg-white/20 text-white py-2.5 rounded-xl text-sm font-medium">
-                    Current Plan ✓
-                </div>
-                {% else %}
-                <a href="{% url 'create_checkout' 'pro' %}"
-                    class="block w-full text-center bg-white text-indigo-600 hover:bg-indigo-50 py-2.5 rounded-xl text-sm font-bold transition">
-                    Upgrade to Pro →
-                </a>
-                {% endif %}
-                {% else %}
-                <a href="{% url 'account_signup' %}"
-                    class="block w-full text-center bg-white text-indigo-600 hover:bg-indigo-50 py-2.5 rounded-xl text-sm font-bold transition">
-                    Get started →
-                </a>
-                {% endif %}
-            </div>
-
-            <!-- ENTERPRISE -->
-            <div class="bg-white rounded-3xl border border-gray-200 p-7">
-                <div class="mb-6">
-                    <div class="w-10 h-10 bg-gray-900 rounded-xl flex items-center justify-center mb-4">
-                        <i class="fa-solid fa-building-columns text-white text-sm"></i>
-                    </div>
-                    <h2 class="text-xl font-bold text-gray-900">Enterprise</h2>
-                    <p class="text-gray-500 text-sm mt-1">For large organizations</p>
-                    <div class="mt-4 flex items-end gap-1">
-                        <span class="text-4xl font-bold text-gray-900">$99</span>
-                        <span class="text-gray-400 text-sm mb-1">/month</span>
-                    </div>
-                </div>
-
-                <div class="space-y-3 mb-7">
-                    <div class="flex items-center gap-2 text-sm text-gray-600"><i
-                            class="fa-solid fa-check text-green-500 text-xs w-4"></i>Unlimited users</div>
-                    <div class="flex items-center gap-2 text-sm text-gray-600"><i
-                            class="fa-solid fa-check text-green-500 text-xs w-4"></i>Unlimited projects</div>
-                    <div class="flex items-center gap-2 text-sm text-gray-600"><i
-                            class="fa-solid fa-check text-green-500 text-xs w-4"></i>Everything in Pro</div>
-                    <div class="flex items-center gap-2 text-sm text-gray-600"><i
-                            class="fa-solid fa-check text-green-500 text-xs w-4"></i>Unlimited storage</div>
-                    <div class="flex items-center gap-2 text-sm text-gray-600"><i
-                            class="fa-solid fa-check text-green-500 text-xs w-4"></i>9999 AI calls/month</div>
-                    <div class="flex items-center gap-2 text-sm text-gray-600"><i
-                            class="fa-solid fa-check text-green-500 text-xs w-4"></i>Custom AI chatbot</div>
-                    <div class="flex items-center gap-2 text-sm text-gray-600"><i
-                            class="fa-solid fa-check text-green-500 text-xs w-4"></i>SSO / SAML login</div>
-                    <div class="flex items-center gap-2 text-sm text-gray-600"><i
-                            class="fa-solid fa-check text-green-500 text-xs w-4"></i>Dedicated support</div>
-                </div>
-
-                {% if user.is_authenticated %}
-                {% if user.subscription.plan == 'enterprise' %}
-                <div class="w-full text-center py-2.5 rounded-xl text-sm font-medium bg-gray-100 text-gray-500">
-                    Current Plan ✓
-                </div>
-                {% else %}
-                <a href="{% url 'create_checkout' 'enterprise' %}"
-                    class="block w-full text-center bg-gray-900 hover:bg-gray-800 text-white py-2.5 rounded-xl text-sm font-bold transition">
-                    Upgrade to Enterprise →
-                </a>
-                {% endif %}
-                {% else %}
-                <a href="{% url 'account_signup' %}"
-                    class="block w-full text-center bg-gray-900 hover:bg-gray-800 text-white py-2.5 rounded-xl text-sm font-bold transition">
-                    Get started →
-                </a>
-                {% endif %}
-            </div>
-
-        </div>
-
-        <!-- FAQ -->
-        <div class="mt-16 max-w-2xl mx-auto">
-            <h2 class="text-2xl font-bold text-gray-900 text-center mb-8">Frequently asked questions</h2>
-            <div class="space-y-4">
-                {% for q, a in faqs %}
-                <div class="bg-white rounded-2xl border border-gray-100 p-5">
-                    <p class="font-semibold text-gray-800 mb-2">{{ q }}</p>
-                    <p class="text-gray-500 text-sm leading-relaxed">{{ a }}</p>
-                </div>
-                {% empty %}
-                <div class="bg-white rounded-2xl border border-gray-100 p-5">
-                    <p class="font-semibold text-gray-800 mb-2">Can I cancel anytime?</p>
-                    <p class="text-gray-500 text-sm">Yes. Cancel anytime from your billing dashboard. You keep Pro
-                        access until the end of your billing period.</p>
-                </div>
-                <div class="bg-white rounded-2xl border border-gray-100 p-5">
-                    <p class="font-semibold text-gray-800 mb-2">Is there a free trial?</p>
-                    <p class="text-gray-500 text-sm">The Starter plan is free forever. You can upgrade to Pro anytime
-                        when you need more features.</p>
-                </div>
-                <div class="bg-white rounded-2xl border border-gray-100 p-5">
-                    <p class="font-semibold text-gray-800 mb-2">What payment methods do you accept?</p>
-                    <p class="text-gray-500 text-sm">We accept all major credit and debit cards via Stripe. Your payment
-                        info is never stored on our servers.</p>
-                </div>
-                <div class="bg-white rounded-2xl border border-gray-100 p-5">
-                    <p class="font-semibold text-gray-800 mb-2">Can I switch plans?</p>
-                    <p class="text-gray-500 text-sm">Yes. Upgrade or downgrade anytime. Changes take effect immediately
-                        for upgrades.</p>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
-
+        function toggleFaq(el) {
+            const answer = el.querySelector('.faq-answer');
+            const icon = el.querySelector('.faq-icon');
+            answer.classList.toggle('hidden');
+            icon.style.transform = answer.classList.contains('hidden') ? '' : 'rotate(180deg)';
+        }
+    </script>
 </body>
 
 </html>
