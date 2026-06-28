@@ -19,8 +19,19 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-wqe^pxrju4v#3%@7(hf!)u=2-cw*xuqc!#le4v%_(wq0@9#48d')
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['nexaops.onrender.com', 'localhost', '127.0.0.1']
-CSRF_TRUSTED_ORIGINS = ['https://nexaops.onrender.com']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'nexaops.onrender.com', 'nexa-p77c.onrender.com']
+
+# Automatically allow the Render-assigned hostname (works for any Render deployment)
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://nexaops.onrender.com',
+    'https://nexa-p77c.onrender.com',
+]
+if RENDER_EXTERNAL_HOSTNAME:
+    CSRF_TRUSTED_ORIGINS.append(f'https://{RENDER_EXTERNAL_HOSTNAME}')
 
 
 # Application definition
