@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}Payment Successful — NexaOps{% endblock %}
+{% block page_title %}Payment Successful{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto text-center py-16">
+    <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+        <i class="fa-solid fa-circle-check text-green-500 text-4xl"></i>
+    </div>
+    <h2 class="text-2xl font-bold text-gray-900 mb-3">Payment Successful!</h2>
+    <p class="text-gray-500 mb-8">Your subscription is now active. Welcome to the full NexaOps experience!</p>
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 text-left mb-6">
+        <h3 class="font-semibold text-gray-800 mb-3">What's unlocked:</h3>
+        <div class="space-y-2">
+            <div class="flex items-center gap-2 text-sm text-gray-600"><i
+                    class="fa-solid fa-check text-green-500"></i>Full AI Assistant access</div>
+            <div class="flex items-center gap-2 text-sm text-gray-600"><i
+                    class="fa-solid fa-check text-green-500"></i>Unlimited projects</div>
+            <div class="flex items-center gap-2 text-sm text-gray-600"><i
+                    class="fa-solid fa-check text-green-500"></i>Advanced analytics</div>
+            <div class="flex items-center gap-2 text-sm text-gray-600"><i
+                    class="fa-solid fa-check text-green-500"></i>Priority support</div>
+        </div>
+    </div>
+    <div class="flex gap-3">
+        <a href="{% url 'dashboard_home' %}"
+            class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl text-sm font-semibold transition">
+            Go to Dashboard
+        </a>
+        <a href="{% url 'billing_dashboard' %}"
+            class="flex-1 border border-gray-200 text-gray-600 hover:bg-gray-50 py-3 rounded-xl text-sm font-medium transition">
+            View Billing
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -3,6 +3,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Employee, Department
 from accounts.models import User
+from accounts.decorators import manager_required
+from audit.utils import log_action
 
 
 @login_required
@@ -36,6 +38,7 @@ def employee_list(request):
     return render(request, 'employees/employee_list.html', context)
 
 
+@manager_required
 @login_required
 def employee_create(request):
     if request.method == 'POST':
@@ -76,10 +79,11 @@ def employee_create(request):
             last_name=last_name,
             job_title=job_title,
             phone=phone,
-            password='NexaOps@2026',  # default password
+            role=request.POST.get('role', 'employee'),
+            password='NexaOps@2026',
         )
 
-        Employee.objects.create(
+        employee = Employee.objects.create(
             user=user,
             employee_id=employee_id or f'EMP{User.objects.count():04d}',
             department_id=department_id,
@@ -87,6 +91,7 @@ def employee_create(request):
             date_of_joining=date_of_joining,
             salary=salary,
         )
+        log_action(request, 'create', 'Employee', user.get_full_name(), employee.pk)
 
         messages.success(request, f'Employee {first_name} {last_name} added successfully! Default password: NexaOps@2026')
         return redirect('employee_list')
@@ -98,24 +103,27 @@ def employee_create(request):
     return render(request, 'employees/employee_form.html', context)
 
 
+@manager_required
 @login_required
 def employee_edit(request, pk):
     employee = get_object_or_404(Employee, pk=pk)
     user     = employee.user
 
     if request.method == 'POST':
-        user.first_name  = request.POST.get('first_name', '')
-        user.last_name   = request.POST.get('last_name', '')
-        user.job_title   = request.POST.get('job_title', '')
-        user.phone       = request.POST.get('phone', '')
+        user.first_name = request.POST.get('first_name', '')
+        user.last_name = request.POST.get('last_name', '')
+        user.job_title = request.POST.get('job_title', '')
+        user.phone = request.POST.get('phone', '')
+        user.role = request.POST.get('role', user.role)
         user.save()
 
-        employee.employee_id     = request.POST.get('employee_id', employee.employee_id)
-        employee.department_id   = request.POST.get('department') or None
-        employee.status          = request.POST.get('status', 'active')
+        employee.employee_id = request.POST.get('employee_id', employee.employee_id)
+        employee.department_id = request.POST.get('department') or None
+        employee.status = request.POST.get('status', 'active')
         employee.date_of_joining = request.POST.get('date_of_joining') or None
-        employee.salary          = request.POST.get('salary') or None
+        employee.salary = request.POST.get('salary') or None
         employee.save()
+        log_action(request, 'update', 'Employee', user.get_full_name(), employee.pk)
 
         messages.success(request, f'Employee {user.get_full_name()} updated!')
         return redirect('employee_list')
@@ -137,11 +145,13 @@ def employee_detail(request, pk):
     return render(request, 'employees/employee_detail.html', context)
 
 
+@manager_required
 @login_required
 def employee_delete(request, pk):
     employee = get_object_or_404(Employee, pk=pk)
     if request.method == 'POST':
         name = employee.user.get_full_name()
+        log_action(request, 'delete', 'Employee', name, pk)
         employee.user.delete()
         messages.success(request, f'Employee {name} removed.')
     return redirect('employee_list')
@@ -155,6 +165,7 @@ def department_list(request):
     return render(request, 'employees/department_list.html', {'departments': departments})
 
 
+@manager_required
 @login_required
 def department_create(request):
     if request.method == 'POST':
@@ -172,6 +183,7 @@ def department_create(request):
     return render(request, 'employees/department_form.html')
 
 
+@manager_required
 @login_required
 def department_delete(request, pk):
     dept = get_object_or_404(Department, pk=pk)

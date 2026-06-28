@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% block title %}AI Search — NexaOps{% endblock %}
+{% block page_title %}AI Smart Search{% endblock %}
+
+{% block content %}
+
+<div class="max-w-3xl mx-auto">
+
+    <!-- Search bar -->
+    <div class="mb-6">
+        <h2 class="text-2xl font-extrabold text-gray-900 mb-1">AI Smart Search</h2>
+        <p class="text-gray-400 text-sm mb-4">Search in plain English across all your data</p>
+
+        <form method="get" class="flex gap-3">
+            <div class="flex-1 relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                <input type="text" name="q" value="{{ query }}" autofocus
+                    placeholder='e.g. "overdue high priority tasks" or "Ahmed projects"'
+                    class="w-full border border-gray-200 rounded-2xl pl-11 pr-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm">
+            </div>
+            <button type="submit"
+                class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3.5 rounded-2xl text-sm font-bold transition shadow-sm shadow-indigo-200">
+                <i class="fa-solid fa-robot mr-1.5"></i> Search
+            </button>
+        </form>
+
+        <!-- Example queries -->
+        {% if not query %}
+        <div class="mt-4">
+            <p class="text-xs text-gray-400 mb-2">Try these examples:</p>
+            <div class="flex flex-wrap gap-2">
+                <a href="?q=overdue+high+priority+tasks"
+                    class="text-xs bg-gray-100 hover:bg-indigo-50 hover:text-indigo-700 text-gray-600 px-3 py-1.5 rounded-xl transition">overdue
+                    high priority tasks</a>
+                <a href="?q=active+projects"
+                    class="text-xs bg-gray-100 hover:bg-indigo-50 hover:text-indigo-700 text-gray-600 px-3 py-1.5 rounded-xl transition">active
+                    projects</a>
+                <a href="?q=completed+tasks"
+                    class="text-xs bg-gray-100 hover:bg-indigo-50 hover:text-indigo-700 text-gray-600 px-3 py-1.5 rounded-xl transition">completed
+                    tasks</a>
+                <a href="?q=finance+documents"
+                    class="text-xs bg-gray-100 hover:bg-indigo-50 hover:text-indigo-700 text-gray-600 px-3 py-1.5 rounded-xl transition">finance
+                    documents</a>
+                <a href="?q=in+progress+tasks+critical"
+                    class="text-xs bg-gray-100 hover:bg-indigo-50 hover:text-indigo-700 text-gray-600 px-3 py-1.5 rounded-xl transition">in
+                    progress critical tasks</a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- AI interpretation -->
+    {% if query %}
+    <div class="flex items-center gap-3 mb-5 p-3 rounded-xl"
+        style="background:rgba(99,102,241,0.06);border:1px solid rgba(99,102,241,0.12)">
+        <div class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+            style="background:rgba(99,102,241,0.15)">
+            <i class="fa-solid fa-robot text-indigo-600 text-xs"></i>
+        </div>
+        <p class="text-sm text-indigo-700 font-medium">{{ ai_interpretation }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Results -->
+    {% if results %}
+    <div class="space-y-3">
+        {% for result in results %}
+        <a href="{{ result.url }}"
+            class="flex items-center gap-4 bg-white rounded-2xl border border-gray-100 shadow-sm p-4 hover:shadow-md hover:border-indigo-200 transition group">
+            <div class="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0
+                {% if result.color == 'indigo' %}bg-indigo-50
+                {% elif result.color == 'violet' %}bg-violet-50
+                {% elif result.color == 'emerald' %}bg-emerald-50
+                {% elif result.color == 'amber' %}bg-amber-50
+                {% else %}bg-gray-100{% endif %}">
+                <i class="fa-solid {{ result.icon }} text-sm
+                    {% if result.color == 'indigo' %}text-indigo-600
+                    {% elif result.color == 'violet' %}text-violet-600
+                    {% elif result.color == 'emerald' %}text-emerald-600
+                    {% elif result.color == 'amber' %}text-amber-600
+                    {% else %}text-gray-500{% endif %}"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold text-gray-800 group-hover:text-indigo-600 transition truncate">{{
+                    result.title }}</p>
+                <p class="text-xs text-gray-400 mt-0.5">{{ result.subtitle }}</p>
+            </div>
+            <div class="flex items-center gap-2 flex-shrink-0">
+                <span class="text-xs px-2.5 py-1 rounded-full font-medium bg-gray-100 text-gray-500">{{ result.badge
+                    }}</span>
+                <span class="text-xs text-gray-300 capitalize">{{ result.type }}</span>
+                <i class="fa-solid fa-arrow-right text-xs text-gray-300 group-hover:text-indigo-400 transition"></i>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+
+    {% elif query %}
+    <div class="text-center py-16 bg-white rounded-2xl border border-gray-100">
+        <i class="fa-solid fa-magnifying-glass text-4xl text-gray-200 mb-3 block"></i>
+        <p class="text-gray-400 font-medium">No results found for "{{ query }}"</p>
+        <p class="text-gray-300 text-sm mt-1">Try different keywords or a broader search</p>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

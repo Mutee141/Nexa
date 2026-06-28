@@ -2,97 +2,286 @@
 {% block title %}{% if project %}Edit{% else %}New{% endif %} Project — NexaOps{% endblock %}
 {% block page_title %}{% if project %}Edit Project{% else %}New Project{% endif %}{% endblock %}
 
+{% block extra_head %}
+<style>
+    .form-card {
+        background: #fff;
+        border-radius: 24px;
+        border: 1px solid rgba(0,0,0,0.06);
+        box-shadow: 0 4px 24px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+    .form-section {
+        padding: 28px 32px;
+        border-bottom: 1px solid #f8fafc;
+    }
+    .form-section:last-child { border-bottom: none; }
+    .form-section-title {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #94a3b8;
+        margin-bottom: 18px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .form-section-title::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: #f1f5f9;
+    }
+    .field-label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 6px;
+    }
+    .field-hint {
+        font-size: 11px;
+        color: #94a3b8;
+        margin-top: 4px;
+    }
+    .form-input {
+        width: 100%;
+        border: 1.5px solid #e5e7eb;
+        border-radius: 14px;
+        padding: 11px 16px;
+        font-size: 14px;
+        color: #1e293b;
+        background: #fff;
+        transition: all 0.18s ease;
+        outline: none;
+    }
+    .form-input:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+    }
+    .form-input::placeholder { color: #cbd5e1; }
+    .form-select {
+        width: 100%;
+        border: 1.5px solid #e5e7eb;
+        border-radius: 14px;
+        padding: 11px 16px;
+        font-size: 14px;
+        color: #1e293b;
+        background: #fff;
+        transition: all 0.18s ease;
+        outline: none;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 14px center;
+        cursor: pointer;
+    }
+    .form-select:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+    }
+    .member-checkbox-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 14px;
+        border-radius: 14px;
+        cursor: pointer;
+        transition: background 0.15s;
+        border: 1.5px solid transparent;
+    }
+    .member-checkbox-row:hover { background: #f8f9ff; border-color: #e0e7ff; }
+    .member-checkbox-row input:checked ~ .member-check-indicator {
+        background: #6366f1;
+        border-color: #6366f1;
+    }
+    .member-check-indicator {
+        width: 18px; height: 18px;
+        border-radius: 6px;
+        border: 1.5px solid #d1d5db;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+        transition: all 0.15s;
+    }
+    .member-avatar {
+        width: 32px; height: 32px;
+        border-radius: 50%;
+        background: #e0e7ff; color: #4f46e5;
+        font-size: 11px; font-weight: 700;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+    }
+    .btn-primary {
+        display: inline-flex; align-items: center; gap: 8px;
+        background: #6366f1;
+        color: #fff;
+        padding: 12px 24px;
+        border-radius: 14px;
+        font-size: 14px; font-weight: 700;
+        border: none; cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: 0 4px 14px rgba(99,102,241,0.3);
+        text-decoration: none;
+    }
+    .btn-primary:hover { background: #4f46e5; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(99,102,241,0.38); }
+    .btn-secondary {
+        display: inline-flex; align-items: center; gap: 8px;
+        background: #fff;
+        color: #64748b;
+        padding: 12px 24px;
+        border-radius: 14px;
+        font-size: 14px; font-weight: 600;
+        border: 1.5px solid #e2e8f0; cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+    .btn-secondary:hover { background: #f8fafc; border-color: #cbd5e1; }
+    .required-star { color: #ef4444; margin-left: 2px; }
+</style>
+{% endblock %}
+
 {% block content %}
+
 <div class="max-w-2xl mx-auto">
-    <div class="flex items-center gap-3 mb-6">
-        <a href="{% url 'project_list' %}" class="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-lg transition">
+
+    <!-- ── Header ── -->
+    <div class="flex items-center gap-3 mb-8">
+        <a href="{% url 'project_list' %}"
+            class="w-10 h-10 flex items-center justify-center rounded-xl border border-gray-200 text-gray-400 hover:text-indigo-600 hover:border-indigo-200 hover:bg-indigo-50 transition flex-shrink-0">
             <i class="fa-solid fa-arrow-left"></i>
         </a>
         <div>
-            <h2 class="text-xl font-bold text-gray-900">{% if project %}Edit Project{% else %}Create New Project{% endif %}</h2>
-            <p class="text-gray-500 text-sm">{% if project %}Update project details{% else %}Start a new project{% endif %}</p>
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-0.5">
+                Projects <span class="text-gray-300">/</span> {% if project %}Edit{% else %}New{% endif %}
+            </p>
+            <h2 class="text-2xl font-extrabold text-gray-900">
+                {% if project %}Edit "{{ project.name }}"{% else %}Create New Project{% endif %}
+            </h2>
         </div>
     </div>
 
-    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-        <form method="post">
-            {% csrf_token %}
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-card">
 
-            <div class="mb-5">
-                <label class="block text-sm font-medium text-gray-700 mb-1.5">Project Name <span class="text-red-500">*</span></label>
-                <input type="text" name="name" value="{{ project.name|default:'' }}" required
-                    placeholder="e.g. Website Redesign"
-                    class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-            </div>
-
-            <div class="mb-5">
-                <label class="block text-sm font-medium text-gray-700 mb-1.5">Description</label>
-                <textarea name="description" rows="3" placeholder="What is this project about?"
-                    class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none">{{ project.description|default:'' }}</textarea>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4 mb-5">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Status</label>
-                    <select name="status" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
-                        <option value="planning"  {% if project.status == 'planning' or not project %}selected{% endif %}>Planning</option>
-                        <option value="active"    {% if project.status == 'active' %}selected{% endif %}>Active</option>
-                        <option value="on_hold"   {% if project.status == 'on_hold' %}selected{% endif %}>On Hold</option>
-                        <option value="completed" {% if project.status == 'completed' %}selected{% endif %}>Completed</option>
-                        <option value="cancelled" {% if project.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
-                    </select>
+            <!-- Section 1: Basic info -->
+            <div class="form-section">
+                <div class="form-section-title">
+                    <i class="fa-solid fa-circle-info text-indigo-400"></i> Basic Information
+                </div>
+                <div class="mb-5">
+                    <label class="field-label">
+                        Project Name <span class="required-star">*</span>
+                    </label>
+                    <input type="text" name="name" value="{{ project.name|default:'' }}" required
+                        placeholder="e.g. Website Redesign"
+                        class="form-input">
+                    <p class="field-hint">Give your project a clear, descriptive name.</p>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Priority</label>
-                    <select name="priority" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
-                        <option value="low"      {% if project.priority == 'low' %}selected{% endif %}>Low</option>
-                        <option value="medium"   {% if project.priority == 'medium' or not project %}selected{% endif %}>Medium</option>
-                        <option value="high"     {% if project.priority == 'high' %}selected{% endif %}>High</option>
-                        <option value="critical" {% if project.priority == 'critical' %}selected{% endif %}>Critical</option>
-                    </select>
+                    <label class="field-label">Description</label>
+                    <textarea name="description" rows="3"
+                        placeholder="What is this project about? What's the goal?"
+                        class="form-input resize-none">{{ project.description|default:'' }}</textarea>
+                    <p class="field-hint">Optional — helps your team understand the project's purpose.</p>
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-4 mb-5">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Start Date</label>
-                    <input type="date" name="start_date" value="{{ project.start_date|date:'Y-m-d'|default:'' }}"
-                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <!-- Section 2: Status & Priority -->
+            <div class="form-section">
+                <div class="form-section-title">
+                    <i class="fa-solid fa-sliders text-indigo-400"></i> Status &amp; Priority
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1.5">End Date</label>
-                    <input type="date" name="end_date" value="{{ project.end_date|date:'Y-m-d'|default:'' }}"
-                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <div class="grid grid-cols-2 gap-5">
+                    <div>
+                        <label class="field-label">Status</label>
+                        <select name="status" class="form-select">
+                            <option value="planning"  {% if project.status == 'planning' or not project %}selected{% endif %}>📋 Planning</option>
+                            <option value="active"    {% if project.status == 'active' %}selected{% endif %}>⚡ Active</option>
+                            <option value="on_hold"   {% if project.status == 'on_hold' %}selected{% endif %}>⏸ On Hold</option>
+                            <option value="completed" {% if project.status == 'completed' %}selected{% endif %}>✅ Completed</option>
+                            <option value="cancelled" {% if project.status == 'cancelled' %}selected{% endif %}>🚫 Cancelled</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="field-label">Priority</label>
+                        <select name="priority" class="form-select">
+                            <option value="low"      {% if project.priority == 'low' %}selected{% endif %}>🟢 Low</option>
+                            <option value="medium"   {% if project.priority == 'medium' or not project %}selected{% endif %}>🟡 Medium</option>
+                            <option value="high"     {% if project.priority == 'high' %}selected{% endif %}>🟠 High</option>
+                            <option value="critical" {% if project.priority == 'critical' %}selected{% endif %}>🔴 Critical</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
-            <div class="mb-6">
-                <label class="block text-sm font-medium text-gray-700 mb-1.5">Team Members</label>
-                <div class="border border-gray-200 rounded-xl p-3 max-h-40 overflow-y-auto space-y-2">
+            <!-- Section 3: Timeline -->
+            <div class="form-section">
+                <div class="form-section-title">
+                    <i class="fa-solid fa-calendar-days text-indigo-400"></i> Timeline
+                </div>
+                <div class="grid grid-cols-2 gap-5">
+                    <div>
+                        <label class="field-label">Start Date</label>
+                        <input type="date" name="start_date"
+                            value="{{ project.start_date|date:'Y-m-d'|default:'' }}"
+                            class="form-input">
+                    </div>
+                    <div>
+                        <label class="field-label">End Date / Deadline</label>
+                        <input type="date" name="end_date"
+                            value="{{ project.end_date|date:'Y-m-d'|default:'' }}"
+                            class="form-input">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 4: Team -->
+            <div class="form-section">
+                <div class="form-section-title">
+                    <i class="fa-solid fa-users text-indigo-400"></i> Team Members
+                </div>
+                <p class="text-xs text-gray-400 mb-4 -mt-2">Select the people who will be working on this project.</p>
+                <div class="space-y-1 max-h-52 overflow-y-auto pr-1">
                     {% for user in users %}
-                    <label class="flex items-center gap-3 cursor-pointer hover:bg-gray-50 px-2 py-1.5 rounded-lg">
+                    <label class="member-checkbox-row">
                         <input type="checkbox" name="members" value="{{ user.pk }}"
                             {% if project and user in project.members.all %}checked{% endif %}
-                            class="rounded text-indigo-600">
-                        <div class="w-7 h-7 bg-indigo-100 text-indigo-700 rounded-full flex items-center justify-center text-xs font-semibold">
+                            class="sr-only peer">
+                        <div class="member-check-indicator peer-checked:bg-indigo-600 peer-checked:border-indigo-600">
+                            <i class="fa-solid fa-check text-white text-xs hidden peer-checked:block"></i>
+                        </div>
+                        <div class="member-avatar">
                             {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
                         </div>
-                        <span class="text-sm text-gray-700">{{ user.get_full_name|default:user.email }}</span>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-semibold text-gray-700 truncate">
+                                {{ user.get_full_name|default:user.email }}
+                            </p>
+                            <p class="text-xs text-gray-400 truncate">{{ user.email }}</p>
+                        </div>
                     </label>
                     {% endfor %}
                 </div>
             </div>
 
-            <div class="flex items-center gap-3 pt-2 border-t border-gray-100">
-                <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-sm font-medium transition">
-                    {% if project %}<i class="fa-solid fa-floppy-disk mr-1"></i> Save Changes
-                    {% else %}<i class="fa-solid fa-plus mr-1"></i> Create Project{% endif %}
+            <!-- Actions -->
+            <div class="flex items-center gap-3 px-8 py-6 bg-gray-50">
+                <button type="submit" class="btn-primary flex-1 justify-center">
+                    {% if project %}
+                    <i class="fa-solid fa-floppy-disk"></i> Save Changes
+                    {% else %}
+                    <i class="fa-solid fa-plus"></i> Create Project
+                    {% endif %}
                 </button>
-                <a href="{% url 'project_list' %}" class="flex-1 text-center border border-gray-200 text-gray-600 hover:bg-gray-50 py-2.5 rounded-xl text-sm font-medium transition">
+                <a href="{% url 'project_list' %}" class="btn-secondary flex-1 justify-center">
                     Cancel
                 </a>
             </div>
-        </form>
-    </div>
+
+        </div>
+    </form>
 </div>
+
 {% endblock %}

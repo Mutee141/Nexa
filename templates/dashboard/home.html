@@ -1,144 +1,539 @@
 {% extends 'base.html' %}
-
 {% block title %}Dashboard — NexaOps{% endblock %}
 {% block page_title %}Dashboard{% endblock %}
 
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    /* Dashboard-specific */
+    .kpi-card {
+        border-radius: 20px;
+        padding: 20px;
+        position: relative;
+        overflow: hidden;
+        color: #fff;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .kpi-card:hover {
+        transform: translateY(-5px) scale(1.01);
+    }
+
+    .kpi-card::before {
+        content: '';
+        position: absolute;
+        top: -20px;
+        right: -20px;
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .kpi-card::after {
+        content: '';
+        position: absolute;
+        bottom: -30px;
+        right: 20px;
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    /* Glassmorphism content cards */
+    .content-card {
+        background: #fff;
+        border-radius: 20px;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04);
+        overflow: hidden;
+        transition: box-shadow 0.3s ease;
+    }
+
+    .content-card:hover {
+        box-shadow: 0 8px 32px rgba(99, 102, 241, 0.1);
+    }
+
+    /* Task rows */
+    .task-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 20px;
+        border-bottom: 1px solid #f8fafc;
+        transition: background 0.15s ease;
+    }
+
+    .task-row:last-child {
+        border-bottom: none;
+    }
+
+    .task-row:hover {
+        background: #f8f9ff;
+    }
+
+    /* Quick action buttons */
+    .quick-btn {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        border-radius: 16px;
+        transition: all 0.2s ease;
+        border: 1px solid transparent;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .quick-btn:hover {
+        transform: translateX(4px);
+    }
+
+    .quick-btn-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    /* Billing plan card */
+    .billing-card {
+        border-radius: 16px;
+        padding: 16px;
+        border: 1px solid;
+        transition: all 0.2s ease;
+    }
+
+    .billing-free {
+        background: #f8fafc;
+        border-color: #e2e8f0;
+    }
+
+    .billing-pro {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.06), rgba(139, 92, 246, 0.06));
+        border-color: rgba(99, 102, 241, 0.2);
+    }
+
+    .billing-enterprise {
+        background: linear-gradient(135deg, rgba(15, 23, 42, 0.04), rgba(51, 65, 85, 0.04));
+        border-color: rgba(51, 65, 85, 0.15);
+    }
+
+    /* Activity feed */
+    .activity-item {
+        position: relative;
+        padding-left: 24px;
+    }
+
+    .activity-item::before {
+        content: '';
+        position: absolute;
+        left: 8px;
+        top: 6px;
+        width: 2px;
+        bottom: -8px;
+        background: #e5e7eb;
+    }
+
+    .activity-item:last-child::before {
+        display: none;
+    }
+
+    .activity-dot {
+        position: absolute;
+        left: 4px;
+        top: 6px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        box-shadow: 0 0 0 1px #e5e7eb;
+    }
+
+    /* Donut ring */
+    .donut-wrap {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .donut-center {
+        position: absolute;
+        text-align: center;
+        pointer-events: none;
+    }
+
+    /* Mini bar sparkline */
+    .mini-bar {
+        display: flex;
+        align-items: flex-end;
+        gap: 2px;
+    }
+
+    .mini-bar span {
+        width: 6px;
+        border-radius: 2px 2px 0 0;
+        background: rgba(255, 255, 255, 0.5);
+        transition: height 0.8s ease;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 
-<!-- Welcome bar -->
-<div class="mb-6">
-    <h2 class="text-2xl font-bold text-gray-900">Good day, {{ request.user.first_name|default:"there" }} 👋</h2>
-    <p class="text-gray-500 text-sm mt-1">Here's what's happening in your workspace today.</p>
+<!-- ════════════════════════
+     WELCOME HEADER
+════════════════════════ -->
+<div class="flex items-start justify-between mb-6 page-section">
+    <div>
+        <h2 class="text-2xl font-extrabold text-gray-900 leading-none">
+            Good {% now "H" as hour %}morning, {{ request.user.first_name|default:"there" }} 👋
+        </h2>
+        <p class="text-gray-400 text-sm mt-1.5">Here's your workspace at a glance — {% now "l, F j" %}</p>
+    </div>
+    <div class="hidden sm:flex items-center gap-2">
+        <button onclick="generateStandup()"
+            class="flex items-center gap-2 border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-4 py-2.5 rounded-xl text-sm font-semibold transition">
+            <i class="fa-solid fa-robot text-xs"></i> Daily Standup
+        </button>
+        <a href="/tasks/create/"
+            class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition shadow-sm shadow-indigo-200">
+            <i class="fa-solid fa-plus text-xs"></i> New Task
+        </a>
+    </div>
 </div>
 
-<!-- Stats cards -->
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-
-    <div class="card-hover bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-        <div class="flex items-center justify-between mb-3">
-            <p class="text-sm text-gray-500 font-medium">Total Tasks</p>
-            <div class="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center">
-                <i class="fa-solid fa-list-check text-indigo-600"></i>
-            </div>
-        </div>
-        <p class="text-3xl font-bold text-gray-900">{{ total_tasks }}</p>
-        <p class="text-xs text-green-600 mt-1"><i class="fa-solid fa-arrow-up"></i> {{ done_tasks }} completed</p>
-    </div>
-
-    <div class="card-hover bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-        <div class="flex items-center justify-between mb-3">
-            <p class="text-sm text-gray-500 font-medium">Active Projects</p>
-            <div class="w-10 h-10 bg-violet-50 rounded-xl flex items-center justify-center">
-                <i class="fa-solid fa-diagram-project text-violet-600"></i>
-            </div>
-        </div>
-        <p class="text-3xl font-bold text-gray-900">{{ total_projects }}</p>
-        <p class="text-xs text-gray-400 mt-1">Across all teams</p>
-    </div>
-
-    <div class="card-hover bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-        <div class="flex items-center justify-between mb-3">
-            <p class="text-sm text-gray-500 font-medium">Employees</p>
-            <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center">
-                <i class="fa-solid fa-users text-emerald-600"></i>
-            </div>
-        </div>
-        <p class="text-3xl font-bold text-gray-900">{{ total_employees }}</p>
-        <p class="text-xs text-gray-400 mt-1">Team members</p>
-    </div>
-
-    <div class="card-hover bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-        <div class="flex items-center justify-between mb-3">
-            <p class="text-sm text-gray-500 font-medium">Meetings Today</p>
-            <div class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center">
-                <i class="fa-solid fa-video text-amber-600"></i>
-            </div>
-        </div>
-        <p class="text-3xl font-bold text-gray-900">{{ meetings_today }}</p>
-        <p class="text-xs text-gray-400 mt-1">Scheduled</p>
-    </div>
-
-</div>
-
-<!-- Recent tasks + quick actions row -->
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-    <!-- Recent Tasks -->
-    <div class="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm">
-        <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-            <h3 class="font-semibold text-gray-800">Recent Tasks</h3>
-            <a href="/tasks/" class="text-indigo-600 text-sm font-medium hover:underline">View all</a>
-        </div>
-        <div class="divide-y divide-gray-50">
-            {% for task in recent_tasks %}
-            <div class="flex items-center gap-4 px-5 py-3 hover:bg-gray-50 transition">
-                <div class="w-2 h-2 rounded-full flex-shrink-0
-                    {% if task.status == 'done' %}bg-green-500
-                    {% elif task.status == 'in_progress' %}bg-blue-500
-                    {% elif task.status == 'review' %}bg-amber-500
-                    {% else %}bg-gray-300{% endif %}">
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="text-sm font-medium text-gray-800 truncate">{{ task.title }}</p>
-                    <p class="text-xs text-gray-400">{{ task.assigned_to.get_full_name|default:"Unassigned" }}</p>
-                </div>
-                <span class="text-xs px-2 py-1 rounded-full font-medium
-                    {% if task.priority == 'critical' %}bg-red-100 text-red-700
-                    {% elif task.priority == 'high' %}bg-orange-100 text-orange-700
-                    {% elif task.priority == 'medium' %}bg-yellow-100 text-yellow-700
-                    {% else %}bg-gray-100 text-gray-600{% endif %}">
-                    {{ task.get_priority_display }}
-                </span>
-            </div>
-            {% empty %}
-            <div class="px-5 py-8 text-center text-gray-400 text-sm">
-                <i class="fa-solid fa-list-check text-2xl mb-2 block"></i>
-                No tasks yet. <a href="/tasks/create/" class="text-indigo-600 hover:underline">Create one</a>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-
-    <!-- Quick Actions -->
-    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm">
-        <div class="px-5 py-4 border-b border-gray-100">
-            <h3 class="font-semibold text-gray-800">Quick Actions</h3>
-        </div>
-        <div class="p-4 space-y-3">
-            <a href="/tasks/create/" class="flex items-center gap-3 p-3 rounded-xl bg-indigo-50 hover:bg-indigo-100 transition group">
-                <div class="w-9 h-9 bg-indigo-600 rounded-lg flex items-center justify-center">
-                    <i class="fa-solid fa-plus text-white text-sm"></i>
-                </div>
-                <div>
-                    <p class="text-sm font-medium text-indigo-900">New Task</p>
-                    <p class="text-xs text-indigo-400">Add a task</p>
-                </div>
-            </a>
-            <a href="/projects/create/" class="flex items-center gap-3 p-3 rounded-xl bg-violet-50 hover:bg-violet-100 transition">
-                <div class="w-9 h-9 bg-violet-600 rounded-lg flex items-center justify-center">
-                    <i class="fa-solid fa-diagram-project text-white text-sm"></i>
-                </div>
-                <div>
-                    <p class="text-sm font-medium text-violet-900">New Project</p>
-                    <p class="text-xs text-violet-400">Start a project</p>
-                </div>
-            </a>
-            <a href="/meetings/create/" class="flex items-center gap-3 p-3 rounded-xl bg-amber-50 hover:bg-amber-100 transition">
-                <div class="w-9 h-9 bg-amber-500 rounded-lg flex items-center justify-center">
-                    <i class="fa-solid fa-video text-white text-sm"></i>
-                </div>
-                <div>
-                    <p class="text-sm font-medium text-amber-900">Schedule Meeting</p>
-                    <p class="text-xs text-amber-400">Create meeting</p>
-                </div>
-            </a>
-            <a href="/ai/assistant/" class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition">
-                <div class="w-9 h-9 bg-gray-800 rounded-lg flex items-center justify-center">
+<!-- Standup Modal -->
+<div id="standup-modal"
+    class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center"
+                    style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">
                     <i class="fa-solid fa-robot text-white text-sm"></i>
                 </div>
                 <div>
-                    <p class="text-sm font-medium text-gray-800">Ask AI</p>
-                    <p class="text-xs text-gray-400">AI assistant</p>
+                    <p class="font-bold text-gray-900 text-sm" id="standup-title">AI Daily Standup</p>
+                    <p class="text-xs text-gray-400" id="standup-date"></p>
+                </div>
+            </div>
+            <button onclick="closeStandup()"
+                class="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-xl transition">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+        <div class="p-6">
+            <div id="standup-loading" class="text-center py-8">
+                <div
+                    class="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-3">
+                </div>
+                <p class="text-sm text-gray-400">AI is reading your tasks...</p>
+            </div>
+            <div id="standup-result" class="hidden">
+                <div class="bg-indigo-50 rounded-2xl p-5 border border-indigo-100 mb-4">
+                    <pre id="standup-text"
+                        class="text-sm text-gray-800 whitespace-pre-wrap font-sans leading-relaxed"></pre>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="copyStandup()"
+                        class="flex-1 border border-gray-200 text-gray-600 hover:bg-gray-50 py-2.5 rounded-xl text-sm font-medium transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-copy"></i> Copy
+                    </button>
+                    <button onclick="closeStandup()"
+                        class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-sm font-medium transition">
+                        Done
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════════════════
+     KPI CARDS (top row)
+════════════════════════ -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6 page-section">
+
+    <!-- Tasks -->
+    <div class="kpi-card"
+        style="background:linear-gradient(135deg,#6366f1 0%,#818cf8 100%);box-shadow:0 8px 24px rgba(99,102,241,0.35)">
+        <div class="flex items-start justify-between mb-3">
+            <div>
+                <p class="text-indigo-200 text-xs font-medium uppercase tracking-wider">Total Tasks</p>
+                <p class="text-4xl font-black mt-1 counter" data-counter="{{ total_tasks }}">0</p>
+            </div>
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center"
+                style="background:rgba(255,255,255,0.15)">
+                <i class="fa-solid fa-list-check text-white"></i>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            <div class="mini-bar">
+                <span style="height:40%"></span><span style="height:60%"></span><span style="height:45%"></span>
+                <span style="height:80%"></span><span style="height:55%"></span><span style="height:90%"></span><span
+                    style="height:70%"></span>
+            </div>
+            <p class="text-indigo-200 text-xs">{{ done_tasks }} completed</p>
+        </div>
+    </div>
+
+    <!-- Projects -->
+    <div class="kpi-card"
+        style="background:linear-gradient(135deg,#7c3aed 0%,#a78bfa 100%);box-shadow:0 8px 24px rgba(124,58,237,0.35)">
+        <div class="flex items-start justify-between mb-3">
+            <div>
+                <p class="text-violet-200 text-xs font-medium uppercase tracking-wider">Projects</p>
+                <p class="text-4xl font-black mt-1 counter" data-counter="{{ total_projects }}">0</p>
+            </div>
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center"
+                style="background:rgba(255,255,255,0.15)">
+                <i class="fa-solid fa-diagram-project text-white"></i>
+            </div>
+        </div>
+        <p class="text-violet-200 text-xs flex items-center gap-1">
+            <i class="fa-solid fa-arrow-trend-up text-xs"></i> Across all teams
+        </p>
+    </div>
+
+    <!-- Employees -->
+    <div class="kpi-card"
+        style="background:linear-gradient(135deg,#059669 0%,#34d399 100%);box-shadow:0 8px 24px rgba(5,150,105,0.3)">
+        <div class="flex items-start justify-between mb-3">
+            <div>
+                <p class="text-emerald-100 text-xs font-medium uppercase tracking-wider">Employees</p>
+                <p class="text-4xl font-black mt-1 counter" data-counter="{{ total_employees }}">0</p>
+            </div>
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center"
+                style="background:rgba(255,255,255,0.15)">
+                <i class="fa-solid fa-users text-white"></i>
+            </div>
+        </div>
+        <p class="text-emerald-100 text-xs flex items-center gap-1">
+            <span class="w-2 h-2 bg-white rounded-full animate-pulse inline-block"></span> Team members active
+        </p>
+    </div>
+
+    <!-- Meetings -->
+    <div class="kpi-card"
+        style="background:linear-gradient(135deg,#d97706 0%,#fbbf24 100%);box-shadow:0 8px 24px rgba(217,119,6,0.3)">
+        <div class="flex items-start justify-between mb-3">
+            <div>
+                <p class="text-amber-100 text-xs font-medium uppercase tracking-wider">Today's Meetings</p>
+                <p class="text-4xl font-black mt-1 counter" data-counter="{{ meetings_today }}">0</p>
+            </div>
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center"
+                style="background:rgba(255,255,255,0.15)">
+                <i class="fa-solid fa-video text-white"></i>
+            </div>
+        </div>
+        <p class="text-amber-100 text-xs flex items-center gap-1">
+            <i class="fa-regular fa-calendar text-xs"></i> Scheduled today
+        </p>
+    </div>
+
+</div>
+
+<!-- AI Risk Detector widget -->
+<div class="bg-white rounded-2xl border border-gray-100 shadow-sm mb-5 page-section" id="risk-widget">
+    <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-xl flex items-center justify-center"
+                style="background:linear-gradient(135deg,#ef4444,#f97316)">
+                <i class="fa-solid fa-triangle-exclamation text-white text-xs"></i>
+            </div>
+            <div>
+                <h3 class="font-bold text-gray-800 text-sm">AI Risk Detector</h3>
+                <p class="text-xs text-gray-400">Scan your workspace for issues</p>
+            </div>
+        </div>
+        <button onclick="runRiskScan()" id="risk-scan-btn"
+            class="flex items-center gap-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-4 py-2 rounded-xl text-xs font-bold transition">
+            <i class="fa-solid fa-radar"></i> Scan Now
+        </button>
+    </div>
+    <div id="risk-content" class="p-5">
+        <div class="text-center py-6 text-gray-300">
+            <i class="fa-solid fa-radar text-3xl mb-2 block"></i>
+            <p class="text-sm">Click "Scan Now" to detect risks in your workspace</p>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════════════════
+     ROW 2: Weekly chart + Billing + Quick Actions
+     (previously Row 3 — moved UP)
+════════════════════════ -->
+<div class="grid grid-cols-1 lg:grid-cols-7 gap-4 mb-4 page-section">
+
+    <!-- Weekly productivity chart -->
+    <div class="lg:col-span-3 content-card p-5">
+        <div class="flex items-center justify-between mb-5">
+            <div>
+                <h3 class="font-bold text-gray-800 text-sm">Weekly Activity</h3>
+                <p class="text-xs text-gray-400 mt-0.5">Tasks created vs completed</p>
+            </div>
+            <div class="flex items-center gap-3 text-xs">
+                <span class="flex items-center gap-1.5"><span class="w-3 h-1.5 rounded-full inline-block"
+                        style="background:#6366f1"></span>Created</span>
+                <span class="flex items-center gap-1.5"><span class="w-3 h-1.5 rounded-full inline-block"
+                        style="background:#10b981"></span>Done</span>
+            </div>
+        </div>
+        <canvas id="weeklyChart" height="130"></canvas>
+    </div>
+
+    <!-- Billing Summary -->
+    <div class="lg:col-span-2 content-card p-5">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-gray-800 text-sm">Billing Summary</h3>
+            <a href="{% url 'billing_dashboard' %}" class="text-xs text-indigo-600 font-medium hover:underline">Manage
+                →</a>
+        </div>
+
+        {% with sub=request.user.subscription %}
+        <div
+            class="billing-card {% if sub.plan == 'pro' %}billing-pro{% elif sub.plan == 'enterprise' %}billing-enterprise{% else %}billing-free{% endif %} mb-4">
+            <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-2">
+                    {% if sub.plan == 'pro' %}
+                    <div class="w-7 h-7 rounded-lg flex items-center justify-center"
+                        style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">
+                        <i class="fa-solid fa-rocket text-white text-xs"></i>
+                    </div>
+                    {% elif sub.plan == 'enterprise' %}
+                    <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:#1e293b">
+                        <i class="fa-solid fa-building-columns text-white text-xs"></i>
+                    </div>
+                    {% else %}
+                    <div class="w-7 h-7 rounded-lg flex items-center justify-center bg-gray-200">
+                        <i class="fa-solid fa-seedling text-gray-500 text-xs"></i>
+                    </div>
+                    {% endif %}
+                    <div>
+                        <p
+                            class="text-sm font-bold {% if sub.plan == 'free' %}text-gray-700{% else %}text-gray-900{% endif %}">
+                            {{ sub.get_plan_display|default:"Free" }} Plan
+                        </p>
+                    </div>
+                </div>
+                <span
+                    class="text-xs px-2 py-1 rounded-full font-semibold
+                    {% if sub.status == 'active' %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-600{% endif %}">
+                    {{ sub.get_status_display|default:"Active" }}
+                </span>
+            </div>
+            {% if sub.plan == 'free' %}
+            <p class="text-xs text-gray-500">Free forever — upgrade for full AI power</p>
+            {% elif sub.plan == 'pro' %}
+            <p class="text-xs text-gray-600">$29/mo · 500 AI calls · 25 users</p>
+            {% else %}
+            <p class="text-xs text-gray-600">$99/mo · Unlimited everything</p>
+            {% endif %}
+        </div>
+
+        {% with limits=sub.get_plan_limits %}
+        {% if limits %}
+        <div class="space-y-3">
+            <div>
+                <div class="flex justify-between text-xs text-gray-500 mb-1">
+                    <span>Users</span>
+                    <span class="font-medium">{{ total_employees|default:0 }} / {{ limits.users }}</span>
+                </div>
+                <div class="prog-bar">
+                    <div class="prog-fill" style="background:linear-gradient(90deg,#6366f1,#818cf8)"
+                        data-progress="{% if limits.users != 999 %}{% widthratio total_employees|default:0 limits.users 100 %}{% else %}20{% endif %}">
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="flex justify-between text-xs text-gray-500 mb-1">
+                    <span>Projects</span>
+                    <span class="font-medium">{{ total_projects|default:0 }} / {% if limits.projects == 999 %}∞{% else
+                        %}{{ limits.projects }}{% endif %}</span>
+                </div>
+                <div class="prog-bar">
+                    <div class="prog-fill" style="background:linear-gradient(90deg,#7c3aed,#a78bfa)"
+                        data-progress="{% if limits.projects != 999 %}{% widthratio total_projects|default:0 limits.projects 100 %}{% else %}15{% endif %}">
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="flex justify-between text-xs text-gray-500 mb-1">
+                    <span>AI Calls/mo</span>
+                    <span class="font-medium">— / {{ limits.ai_calls }}</span>
+                </div>
+                <div class="prog-bar">
+                    <div class="prog-fill" style="background:linear-gradient(90deg,#0891b2,#22d3ee)" data-progress="5">
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        {% if sub.plan == 'free' %}
+        <a href="{% url 'create_checkout' 'pro' %}"
+            class="mt-4 flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-bold text-white transition"
+            style="background:linear-gradient(135deg,#6366f1,#8b5cf6);box-shadow:0 4px 12px rgba(99,102,241,0.35)">
+            <i class="fa-solid fa-rocket text-xs"></i> Upgrade to Pro — $29/mo
+        </a>
+        {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="lg:col-span-2 content-card p-4">
+        <h3 class="font-bold text-gray-800 text-sm mb-3 px-1">Quick Actions</h3>
+        <div class="space-y-2">
+            <a href="/tasks/create/" class="quick-btn" style="background:#eef2ff;border-color:#e0e7ff">
+                <div class="quick-btn-icon" style="background:linear-gradient(135deg,#6366f1,#818cf8)">
+                    <i class="fa-solid fa-plus text-white text-sm"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-semibold text-indigo-900 leading-none">New Task</p>
+                    <p class="text-xs text-indigo-400 mt-0.5">Add & assign</p>
+                </div>
+            </a>
+            <a href="/projects/create/" class="quick-btn" style="background:#f5f3ff;border-color:#ede9fe">
+                <div class="quick-btn-icon" style="background:linear-gradient(135deg,#7c3aed,#a78bfa)">
+                    <i class="fa-solid fa-diagram-project text-white text-sm"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-semibold text-violet-900 leading-none">New Project</p>
+                    <p class="text-xs text-violet-400 mt-0.5">Start tracking</p>
+                </div>
+            </a>
+            <a href="/meetings/create/" class="quick-btn" style="background:#fffbeb;border-color:#fef3c7">
+                <div class="quick-btn-icon" style="background:linear-gradient(135deg,#d97706,#fbbf24)">
+                    <i class="fa-solid fa-video text-white text-sm"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-semibold text-amber-900 leading-none">Schedule</p>
+                    <p class="text-xs text-amber-400 mt-0.5">Book a meeting</p>
+                </div>
+            </a>
+            <a href="/employees/create/" class="quick-btn" style="background:#f0fdf4;border-color:#dcfce7">
+                <div class="quick-btn-icon" style="background:linear-gradient(135deg,#059669,#34d399)">
+                    <i class="fa-solid fa-user-plus text-white text-sm"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-semibold text-emerald-900 leading-none">Add Employee</p>
+                    <p class="text-xs text-emerald-400 mt-0.5">Onboard member</p>
+                </div>
+            </a>
+            <a href="/ai/assistant/" class="quick-btn" style="background:#0f0f17;border-color:#1e1e2e">
+                <div class="quick-btn-icon ai-glow" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">
+                    <i class="fa-solid fa-robot text-white text-sm"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-semibold text-white leading-none">Ask AI</p>
+                    <p class="text-xs mt-0.5" style="color:#6366f1">Your assistant</p>
                 </div>
             </a>
         </div>
@@ -146,4 +541,353 @@
 
 </div>
 
+<!-- ════════════════════════
+     ROW 3: Task Status donut + Recent Tasks + Activity
+     (previously Row 2 — moved DOWN)
+════════════════════════ -->
+<div class="grid grid-cols-1 lg:grid-cols-7 gap-4 page-section">
+
+    <!-- Task status donut chart -->
+    <div class="lg:col-span-2 content-card p-5">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-gray-800 text-sm">Task Status</h3>
+            <a href="/tasks/" class="text-xs text-indigo-600 font-medium hover:underline">Details →</a>
+        </div>
+        <div class="donut-wrap mx-auto" style="width:140px;height:140px">
+            <canvas id="donutChart" width="140" height="140"></canvas>
+            <div class="donut-center">
+                <p class="text-2xl font-black text-gray-900" id="donutCenter">{{ total_tasks }}</p>
+                <p class="text-xs text-gray-400">Total</p>
+            </div>
+        </div>
+        <div class="mt-4 space-y-2">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full"
+                        style="background:#6366f1"></span><span class="text-xs text-gray-600">To Do</span></div>
+                <span class="text-xs font-semibold text-gray-800">{{ todo_count|default:0 }}</span>
+            </div>
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full"
+                        style="background:#3b82f6"></span><span class="text-xs text-gray-600">In Progress</span></div>
+                <span class="text-xs font-semibold text-gray-800">{{ inprogress_count|default:0 }}</span>
+            </div>
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full"
+                        style="background:#f59e0b"></span><span class="text-xs text-gray-600">Review</span></div>
+                <span class="text-xs font-semibold text-gray-800">{{ review_count|default:0 }}</span>
+            </div>
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full"
+                        style="background:#10b981"></span><span class="text-xs text-gray-600">Done</span></div>
+                <span class="text-xs font-semibold text-gray-800">{{ done_tasks }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Tasks -->
+    <div class="lg:col-span-3 content-card">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-gray-50">
+            <h3 class="font-bold text-gray-800 text-sm">Recent Tasks</h3>
+            <a href="/tasks/" class="text-xs text-indigo-600 font-medium hover:underline">View all →</a>
+        </div>
+        {% for task in recent_tasks %}
+        <div class="task-row">
+            <div class="w-2.5 h-2.5 rounded-full flex-shrink-0
+                {% if task.status == 'done' %}bg-emerald-500
+                {% elif task.status == 'in_progress' %}bg-blue-500
+                {% elif task.status == 'review' %}bg-amber-400
+                {% else %}bg-gray-300{% endif %}">
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-gray-800 truncate leading-none">{{ task.title }}</p>
+                <p class="text-xs text-gray-400 mt-0.5">{{ task.assigned_to.get_full_name|default:"Unassigned" }}</p>
+            </div>
+            <span class="text-xs px-2.5 py-1 rounded-full font-semibold flex-shrink-0
+                {% if task.priority == 'critical' %}bg-red-100 text-red-600
+                {% elif task.priority == 'high' %}bg-orange-100 text-orange-600
+                {% elif task.priority == 'medium' %}bg-yellow-100 text-yellow-700
+                {% else %}bg-gray-100 text-gray-500{% endif %}">
+                {{ task.get_priority_display }}
+            </span>
+        </div>
+        {% empty %}
+        <div class="py-12 text-center">
+            <div class="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                <i class="fa-solid fa-list-check text-indigo-400"></i>
+            </div>
+            <p class="text-sm text-gray-400 font-medium">No tasks yet</p>
+            <a href="/tasks/create/" class="text-xs text-indigo-600 hover:underline mt-1 inline-block">Create your first
+                task →</a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Activity feed -->
+    <div class="lg:col-span-2 content-card p-5">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-gray-800 text-sm">Recent Activity</h3>
+            <span class="text-xs text-gray-400">Live</span>
+        </div>
+        <div class="space-y-3 overflow-y-auto" style="max-height:220px">
+            {% for task in recent_tasks|slice:":6" %}
+            <div class="activity-item">
+                <div class="activity-dot
+                    {% if task.status == 'done' %}bg-emerald-500
+                    {% elif task.status == 'in_progress' %}bg-blue-500
+                    {% elif task.status == 'review' %}bg-amber-400
+                    {% else %}bg-gray-300{% endif %}">
+                </div>
+                <div class="pb-3">
+                    <p class="text-xs font-semibold text-gray-800 leading-tight truncate">{{ task.title }}</p>
+                    <div class="flex items-center gap-2 mt-0.5">
+                        <p class="text-xs text-gray-400">{{ task.get_status_display }}</p>
+                        <span class="text-gray-200">·</span>
+                        <p class="text-xs text-gray-400">{{ task.updated_at|timesince }} ago</p>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center py-8">
+                <div class="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-2">
+                    <i class="fa-solid fa-clock-rotate-left text-gray-300"></i>
+                </div>
+                <p class="text-xs text-gray-400">No activity yet</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- AI tip -->
+        <div class="mt-4 p-3 rounded-xl"
+            style="background:linear-gradient(135deg,rgba(99,102,241,0.08),rgba(139,92,246,0.06));border:1px solid rgba(99,102,241,0.12)">
+            <div class="flex items-start gap-2">
+                <div class="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
+                    style="background:rgba(99,102,241,0.15)">
+                    <i class="fa-solid fa-robot text-indigo-500 text-xs"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold text-indigo-800">AI Tip</p>
+                    <p class="text-xs text-indigo-600 mt-0.5 leading-relaxed">Ask the AI to write a standup update or
+                        summarize your week.</p>
+                    <a href="/ai/assistant/"
+                        class="text-xs text-indigo-600 font-semibold hover:underline mt-1 inline-block">Try it →</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // ─── Animated counters ───
+    // base.html already handles [data-counter] elements via animateCounter()
+
+    // ─── Donut chart ───
+    const donutCtx = document.getElementById('donutChart')?.getContext('2d');
+    if (donutCtx) {
+        const todo = {{ todo_count|default:0 }};
+        const inprog = {{ inprogress_count|default:0 }};
+        const review = {{ review_count|default:0 }};
+        const done = {{ done_tasks|default:0 }};
+    const total = todo + inprog + review + done;
+
+    new Chart(donutCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['To Do', 'In Progress', 'Review', 'Done'],
+            datasets: [{
+                data: [todo, inprog, review, done || (total === 0 ? 1 : 0)],
+                backgroundColor: ['#6366f1', '#3b82f6', '#f59e0b', '#10b981'],
+                borderWidth: 0,
+                hoverOffset: 6,
+            }]
+        },
+        options: {
+            responsive: false,
+            cutout: '72%',
+            plugins: {
+                legend: { display: false }, tooltip: {
+                    callbacks: {
+                        label: ctx => ` ${ctx.label}: ${ctx.parsed}`
+                    }
+                }
+            },
+            animation: { duration: 1000, easing: 'easeInOutQuart' }
+        }
+    });
+}
+
+    // ─── Weekly activity line chart ───
+    const weekCtx = document.getElementById('weeklyChart')?.getContext('2d');
+    if (weekCtx) {
+        const days = [];
+        for (let i = 6; i >= 0; i--) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            days.push(d.toLocaleDateString('en', { weekday: 'short' }));
+        }
+
+        Chart.defaults.font.family = 'Inter, sans-serif';
+        Chart.defaults.color = '#94a3b8';
+
+        new Chart(weekCtx, {
+            type: 'line',
+            data: {
+                labels: days,
+                datasets: [
+                    {
+                        label: 'Created',
+                        data: [2, 5, 3, 8, 4, 7, {{ total_tasks }}],
+                borderColor: '#6366f1',
+                backgroundColor: 'rgba(99,102,241,0.08)',
+                borderWidth: 2,
+                tension: 0.45,
+                fill: true,
+                pointBackgroundColor: '#6366f1',
+                pointRadius: 3,
+                pointHoverRadius: 5,
+            },
+                {
+                label: 'Done',
+                data: [1, 3, 2, 5, 3, 4, {{ done_tasks }}],
+            borderColor: '#10b981',
+            backgroundColor: 'rgba(16,185,129,0.06)',
+            borderWidth: 2,
+            tension: 0.45,
+            fill: true,
+            pointBackgroundColor: '#10b981',
+            pointRadius: 3,
+            pointHoverRadius: 5,
+                }
+            ]
+        },
+    options: {
+        responsive: true,
+            plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
+        interaction: { mode: 'nearest', axis: 'x', intersect: false },
+        scales: {
+            y: {
+                beginAtZero: true,
+                    ticks: { stepSize: 1, font: { size: 11 } },
+                grid: { color: '#f1f5f9', drawBorder: false },
+            },
+            x: {
+                grid: { display: false },
+                ticks: { font: { size: 11 } }
+            }
+        }
+    }
+    });
+}
+
+    // ─── Mini sparkline animation ───
+    document.querySelectorAll('.mini-bar span').forEach((bar, i) => {
+        const heights = ['40%', '60%', '45%', '80%', '55%', '90%', '70%'];
+        setTimeout(() => { bar.style.height = heights[i % heights.length]; }, 300 + i * 80);
+    });
+
+    // ─── AI Standup ───
+    function generateStandup() {
+        document.getElementById('standup-modal').classList.remove('hidden');
+        document.getElementById('standup-loading').classList.remove('hidden');
+        document.getElementById('standup-result').classList.add('hidden');
+
+        fetch('/ai/standup/', {
+            method: 'POST',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+        })
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('standup-loading').classList.add('hidden');
+                document.getElementById('standup-result').classList.remove('hidden');
+                if (data.standup) {
+                    document.getElementById('standup-text').textContent = data.standup;
+                    document.getElementById('standup-date').textContent = data.date;
+                } else {
+                    document.getElementById('standup-text').textContent = 'Error: ' + (data.error || 'Unknown error');
+                }
+            })
+            .catch(() => {
+                document.getElementById('standup-loading').classList.add('hidden');
+                document.getElementById('standup-result').classList.remove('hidden');
+                document.getElementById('standup-text').textContent = 'Connection error. Please try again.';
+            });
+    }
+
+    function closeStandup() {
+        document.getElementById('standup-modal').classList.add('hidden');
+    }
+
+    function copyStandup() {
+        const text = document.getElementById('standup-text').textContent;
+        navigator.clipboard.writeText(text).then(() => {
+            alert('Standup copied to clipboard!');
+        });
+    }
+
+    document.getElementById('standup-modal')?.addEventListener('click', function (e) {
+        if (e.target === this) closeStandup();
+    });
+
+    // ─── AI Risk Detector ───
+    function runRiskScan() {
+        const btn = document.getElementById('risk-scan-btn');
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Scanning...';
+        btn.disabled = true;
+
+        document.getElementById('risk-content').innerHTML = `
+        <div class="text-center py-6">
+            <div class="w-8 h-8 border-4 border-red-200 border-t-red-500 rounded-full animate-spin mx-auto mb-2"></div>
+            <p class="text-sm text-gray-400">AI is scanning your workspace...</p>
+        </div>`;
+
+        fetch('/ai/risk-detector/', {
+            method: 'POST',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+        })
+            .then(r => r.json())
+            .then(data => {
+                btn.innerHTML = '<i class="fa-solid fa-radar"></i> Scan Now';
+                btn.disabled = false;
+
+                if (data.risks === undefined) {
+                    document.getElementById('risk-content').innerHTML = `<p class="text-red-500 text-sm p-4">Error: ${data.error}</p>`;
+                    return;
+                }
+
+                const levelColor = { high: 'red', medium: 'amber', low: 'blue' };
+                const levelBg = { high: 'bg-red-50 border-red-200 text-red-700', medium: 'bg-amber-50 border-amber-200 text-amber-700', low: 'bg-blue-50 border-blue-200 text-blue-700' };
+
+                let html = `
+            <div class="flex items-start gap-3 p-3 rounded-xl mb-4" style="background:rgba(99,102,241,0.06);border:1px solid rgba(99,102,241,0.12)">
+                <i class="fa-solid fa-robot text-indigo-500 mt-0.5 flex-shrink-0"></i>
+                <p class="text-sm text-indigo-700">${data.ai_summary}</p>
+            </div>`;
+
+                if (data.count === 0) {
+                    html += `<div class="text-center py-4"><i class="fa-solid fa-circle-check text-emerald-400 text-3xl mb-2 block"></i><p class="text-sm text-emerald-600 font-medium">All clear!</p></div>`;
+                } else {
+                    html += `<div class="grid grid-cols-1 md:grid-cols-2 gap-3">`;
+                    data.risks.forEach(risk => {
+                        const colorClass = levelBg[risk.level] || 'bg-gray-50 border-gray-200 text-gray-700';
+                        html += `
+                    <div class="flex items-start gap-3 p-3 rounded-xl border ${colorClass}">
+                        <i class="fa-solid fa-circle-exclamation mt-0.5 flex-shrink-0 text-sm"></i>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-xs font-bold">${risk.title}</p>
+                            <p class="text-xs opacity-75 truncate mt-0.5">${risk.detail}</p>
+                            <p class="text-xs opacity-60">${risk.assignee}</p>
+                        </div>
+                        <a href="${risk.action}" class="text-xs font-semibold underline opacity-75 hover:opacity-100 flex-shrink-0">${risk.action_label}</a>
+                    </div>`;
+                    });
+                    html += `</div>`;
+                }
+
+                document.getElementById('risk-content').innerHTML = html;
+            });
+    }
+</script>
 {% endblock %}

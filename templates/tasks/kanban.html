@@ -1,0 +1,368 @@
+{% extends 'base.html' %}
+{% block title %}Kanban Board — NexaOps{% endblock %}
+{% block page_title %}Kanban Board{% endblock %}
+
+{% block extra_head %}
+<style>
+    .kanban-col {
+        min-height: 500px;
+        transition: background 0.2s ease;
+    }
+
+    .kanban-col.drag-over {
+        background: rgba(99, 102, 241, 0.06);
+        border-color: rgba(99, 102, 241, 0.3) !important;
+    }
+
+    .kanban-card {
+        background: #fff;
+        border: 1px solid #f1f5f9;
+        border-radius: 14px;
+        padding: 14px;
+        margin-bottom: 10px;
+        cursor: grab;
+        transition: all 0.2s ease;
+        user-select: none;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+    }
+
+    .kanban-card:hover {
+        box-shadow: 0 4px 16px rgba(99, 102, 241, 0.12);
+        transform: translateY(-2px);
+        border-color: rgba(99, 102, 241, 0.2);
+    }
+
+    .kanban-card.dragging {
+        opacity: 0.5;
+        transform: rotate(2deg);
+        cursor: grabbing;
+    }
+
+    .col-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 16px 10px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .col-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .col-count {
+        font-size: 11px;
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: 10px;
+        background: #f1f5f9;
+        color: #64748b;
+    }
+
+    .add-task-btn {
+        width: 100%;
+        padding: 8px;
+        border: 1.5px dashed #e2e8f0;
+        border-radius: 12px;
+        color: #94a3b8;
+        font-size: 12px;
+        background: transparent;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-align: center;
+        margin-top: 6px;
+        text-decoration: none;
+        display: block;
+    }
+
+    .add-task-btn:hover {
+        border-color: #6366f1;
+        color: #6366f1;
+        background: rgba(99, 102, 241, 0.04);
+    }
+
+    .drop-indicator {
+        height: 3px;
+        border-radius: 2px;
+        background: #6366f1;
+        margin-bottom: 8px;
+        display: none;
+    }
+
+    .card-assignee {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        color: #fff;
+        font-size: 9px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Header -->
+<div class="flex items-center justify-between mb-5">
+    <div>
+        <h2 class="text-2xl font-extrabold text-gray-900">Kanban Board</h2>
+        <p class="text-gray-400 text-sm mt-1">Drag and drop tasks between columns</p>
+    </div>
+    <div class="flex gap-2 items-center">
+        <!-- Project filter -->
+        <form method="get">
+            <select name="project" onchange="this.form.submit()"
+                class="border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <option value="">All projects</option>
+                {% for p in projects %}
+                <option value="{{ p.pk }}" {% if selected_project == p.pk|stringformat:"s" %}selected{% endif %}>
+                    {{ p.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </form>
+        <a href="{% url 'task_list' %}"
+            class="border border-gray-200 text-gray-600 hover:bg-gray-50 px-4 py-2 rounded-xl text-sm font-medium transition">
+            <i class="fa-solid fa-table-list mr-1"></i> List View
+        </a>
+        <a href="{% url 'task_create' %}"
+            class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition shadow-sm shadow-indigo-200">
+            <i class="fa-solid fa-plus mr-1"></i> New Task
+        </a>
+    </div>
+</div>
+
+<!-- Kanban columns -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+
+    <!-- TO DO -->
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div class="col-header">
+            <div class="flex items-center gap-2">
+                <div class="col-dot" style="background:#94a3b8"></div>
+                <span class="text-sm font-bold text-gray-700">To Do</span>
+            </div>
+            <span class="col-count">{{ todo.count }}</span>
+        </div>
+        <div class="kanban-col p-3" data-status="todo" id="col-todo">
+            <div class="drop-indicator" id="ind-todo"></div>
+            {% for task in todo %}
+            {% include 'tasks/kanban_card.html' %}
+            {% empty %}
+            <div class="text-center py-8 text-gray-300">
+                <i class="fa-solid fa-inbox text-2xl mb-2 block"></i>
+                <p class="text-xs">No tasks here</p>
+            </div>
+            {% endfor %}
+            <a href="{% url 'task_create' %}" class="add-task-btn">
+                <i class="fa-solid fa-plus mr-1"></i> Add task
+            </a>
+        </div>
+    </div>
+
+    <!-- IN PROGRESS -->
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div class="col-header">
+            <div class="flex items-center gap-2">
+                <div class="col-dot" style="background:#3b82f6"></div>
+                <span class="text-sm font-bold text-gray-700">In Progress</span>
+            </div>
+            <span class="col-count">{{ in_progress.count }}</span>
+        </div>
+        <div class="kanban-col p-3" data-status="in_progress" id="col-in_progress">
+            <div class="drop-indicator" id="ind-in_progress"></div>
+            {% for task in in_progress %}
+            {% include 'tasks/kanban_card.html' %}
+            {% empty %}
+            <div class="text-center py-8 text-gray-300">
+                <i class="fa-solid fa-spinner text-2xl mb-2 block"></i>
+                <p class="text-xs">Nothing in progress</p>
+            </div>
+            {% endfor %}
+            <a href="{% url 'task_create' %}" class="add-task-btn">
+                <i class="fa-solid fa-plus mr-1"></i> Add task
+            </a>
+        </div>
+    </div>
+
+    <!-- IN REVIEW -->
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div class="col-header">
+            <div class="flex items-center gap-2">
+                <div class="col-dot" style="background:#f59e0b"></div>
+                <span class="text-sm font-bold text-gray-700">In Review</span>
+            </div>
+            <span class="col-count">{{ review.count }}</span>
+        </div>
+        <div class="kanban-col p-3" data-status="review" id="col-review">
+            <div class="drop-indicator" id="ind-review"></div>
+            {% for task in review %}
+            {% include 'tasks/kanban_card.html' %}
+            {% empty %}
+            <div class="text-center py-8 text-gray-300">
+                <i class="fa-solid fa-magnifying-glass text-2xl mb-2 block"></i>
+                <p class="text-xs">Nothing under review</p>
+            </div>
+            {% endfor %}
+            <a href="{% url 'task_create' %}" class="add-task-btn">
+                <i class="fa-solid fa-plus mr-1"></i> Add task
+            </a>
+        </div>
+    </div>
+
+    <!-- DONE -->
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div class="col-header">
+            <div class="flex items-center gap-2">
+                <div class="col-dot" style="background:#10b981"></div>
+                <span class="text-sm font-bold text-gray-700">Done</span>
+            </div>
+            <span class="col-count">{{ done.count }}</span>
+        </div>
+        <div class="kanban-col p-3" data-status="done" id="col-done">
+            <div class="drop-indicator" id="ind-done"></div>
+            {% for task in done %}
+            {% include 'tasks/kanban_card.html' %}
+            {% empty %}
+            <div class="text-center py-8 text-gray-300">
+                <i class="fa-solid fa-circle-check text-2xl mb-2 block"></i>
+                <p class="text-xs">No completed tasks</p>
+            </div>
+            {% endfor %}
+            <a href="{% url 'task_create' %}" class="add-task-btn">
+                <i class="fa-solid fa-plus mr-1"></i> Add task
+            </a>
+        </div>
+    </div>
+
+</div>
+
+<!-- Toast notification -->
+<div id="toast"
+    class="fixed bottom-6 right-6 bg-gray-900 text-white text-sm px-5 py-3 rounded-2xl shadow-xl opacity-0 transition-opacity duration-300 pointer-events-none flex items-center gap-2 z-50">
+    <i class="fa-solid fa-circle-check text-green-400"></i>
+    <span id="toast-msg">Task moved!</span>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const CSRF = '{{ csrf_token }}';
+    let draggedCard = null;
+
+    // Show toast
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        document.getElementById('toast-msg').textContent = msg;
+        t.style.opacity = '1';
+        setTimeout(() => { t.style.opacity = '0'; }, 2500);
+    }
+
+    // Update count badge
+    function updateCount(colId) {
+        const col = document.getElementById('col-' + colId);
+        const cards = col.querySelectorAll('.kanban-card').length;
+        // Find the count span in the parent
+        const header = col.closest('.bg-white').querySelector('.col-count');
+        if (header) header.textContent = cards;
+    }
+
+    // Drag start
+    document.addEventListener('dragstart', e => {
+        const card = e.target.closest('.kanban-card');
+        if (!card) return;
+        draggedCard = card;
+        card.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', card.dataset.taskId);
+    });
+
+    // Drag end
+    document.addEventListener('dragend', e => {
+        const card = e.target.closest('.kanban-card');
+        if (card) card.classList.remove('dragging');
+        document.querySelectorAll('.kanban-col').forEach(c => c.classList.remove('drag-over'));
+        draggedCard = null;
+    });
+
+    // Drag over columns
+    document.querySelectorAll('.kanban-col').forEach(col => {
+        col.addEventListener('dragover', e => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            col.classList.add('drag-over');
+        });
+
+        col.addEventListener('dragleave', e => {
+            if (!col.contains(e.relatedTarget)) {
+                col.classList.remove('drag-over');
+            }
+        });
+
+        col.addEventListener('drop', async e => {
+            e.preventDefault();
+            col.classList.remove('drag-over');
+            if (!draggedCard) return;
+
+            const taskId = draggedCard.dataset.taskId;
+            const newStatus = col.dataset.status;
+            const oldStatus = draggedCard.dataset.status;
+
+            if (newStatus === oldStatus) return;
+
+            // Optimistic UI — move card immediately
+            const addBtn = col.querySelector('.add-task-btn');
+            col.insertBefore(draggedCard, addBtn);
+            draggedCard.dataset.status = newStatus;
+
+            // Update status badge on card
+            const badge = draggedCard.querySelector('.status-badge');
+            const labels = {
+                'todo': ['bg-gray-100 text-gray-600', 'To Do'],
+                'in_progress': ['bg-blue-100 text-blue-700', 'In Progress'],
+                'review': ['bg-amber-100 text-amber-700', 'In Review'],
+                'done': ['bg-green-100 text-green-700', 'Done'],
+            };
+            if (badge && labels[newStatus]) {
+                badge.className = 'status-badge text-xs px-2 py-0.5 rounded-full font-medium ' + labels[newStatus][0];
+                badge.textContent = labels[newStatus][1];
+            }
+
+            // Remove empty state messages in destination col
+            col.querySelectorAll('.text-center.py-8').forEach(el => el.remove());
+
+            updateCount(oldStatus);
+            updateCount(newStatus);
+
+            // API call
+            try {
+                const res = await fetch(`/tasks/${taskId}/status/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': CSRF,
+                    },
+                    body: JSON.stringify({ status: newStatus }),
+                });
+                const data = await res.json();
+                if (data.ok) {
+                    showToast(`Moved to ${data.status}`);
+                } else {
+                    showToast('Failed to update. Please refresh.');
+                }
+            } catch {
+                showToast('Network error. Changes may not be saved.');
+            }
+        });
+    });
+</script>
+{% endblock %}

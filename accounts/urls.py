@@ -5,4 +5,8 @@ urlpatterns = [
     path('profile/',          views.profile,         name='profile'),
     path('profile/edit/',     views.profile_edit,    name='profile_edit'),
     path('profile/password/', views.change_password, name='change_password'),
+    
+    path('api-settings/', views.api_settings, name='api_settings'),
+    path('api-settings/regenerate/', views.regenerate_token, name='regenerate_token'),
+    
 ]

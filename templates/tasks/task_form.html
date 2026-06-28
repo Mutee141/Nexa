@@ -2,105 +2,648 @@
 {% block title %}{% if task %}Edit{% else %}New{% endif %} Task — NexaOps{% endblock %}
 {% block page_title %}{% if task %}Edit Task{% else %}New Task{% endif %}{% endblock %}
 
+{% block extra_head %}
+<style>
+    /* ── Full-width form layout ── */
+    .form-layout {
+        display: grid;
+        grid-template-columns: 1fr 300px;
+        gap: 20px;
+        align-items: start;
+    }
+
+    @media (max-width: 900px) {
+        .form-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* ── Page nav ── */
+    .page-nav {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 22px;
+    }
+
+    .back-btn {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        border: 1.5px solid #e8e8f0;
+        background: #fff;
+        color: #6b7280;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        transition: all 0.15s;
+    }
+
+    .back-btn:hover {
+        border-color: #6366f1;
+        color: #6366f1;
+        background: #eef2ff;
+    }
+
+    .page-nav h2 {
+        font-size: 18px;
+        font-weight: 800;
+        color: #1e1b4b;
+    }
+
+    .page-nav p {
+        font-size: 12.5px;
+        color: #9ca3af;
+        margin-top: 1px;
+    }
+
+    /* ── Form card ── */
+    .form-card {
+        background: #fff;
+        border-radius: 20px;
+        border: 1.5px solid #f0f0f7;
+        box-shadow: 0 2px 16px rgba(80, 70, 160, 0.06);
+        overflow: hidden;
+    }
+
+    .form-card-header {
+        padding: 18px 24px 16px;
+        border-bottom: 1px solid #f3f4f8;
+        background: linear-gradient(135deg, #fafbff, #f5f7ff);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .form-card-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 16px;
+        flex-shrink: 0;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+
+    .form-card-title {
+        font-size: 15px;
+        font-weight: 800;
+        color: #1e1b4b;
+    }
+
+    .form-card-sub {
+        font-size: 12px;
+        color: #9ca3af;
+        margin-top: 1px;
+    }
+
+    .form-body {
+        padding: 24px;
+    }
+
+    /* ── Form fields ── */
+    .field-group {
+        margin-bottom: 20px;
+    }
+
+    .field-group:last-child {
+        margin-bottom: 0;
+    }
+
+    .field-label {
+        display: block;
+        font-size: 12px;
+        font-weight: 700;
+        color: #374151;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        margin-bottom: 7px;
+    }
+
+    .field-label .req {
+        color: #ef4444;
+        margin-left: 2px;
+    }
+
+    .field-input,
+    .field-textarea,
+    .field-select {
+        width: 100%;
+        border: 1.5px solid #e8e8f0;
+        border-radius: 12px;
+        padding: 11px 16px;
+        font-size: 13.5px;
+        color: #1e1b4b;
+        background: #fff;
+        outline: none;
+        transition: border-color 0.15s, box-shadow 0.15s;
+        box-sizing: border-box;
+        font-family: inherit;
+    }
+
+    .field-input:focus,
+    .field-textarea:focus,
+    .field-select:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .field-input::placeholder,
+    .field-textarea::placeholder {
+        color: #c4c9d9;
+    }
+
+    .field-textarea {
+        resize: vertical;
+        min-height: 100px;
+        line-height: 1.6;
+    }
+
+    .field-select {
+        appearance: none;
+        cursor: pointer;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%236b7280'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 14px center;
+        background-size: 16px;
+        padding-right: 40px;
+    }
+
+    /* Grid rows */
+    .field-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+        margin-bottom: 20px;
+    }
+
+    @media (max-width: 600px) {
+        .field-row {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Priority indicator inside select area */
+    .priority-pills {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 6px;
+        margin-top: 8px;
+    }
+
+    .priority-pill {
+        border: 1.5px solid transparent;
+        border-radius: 10px;
+        padding: 8px 6px;
+        font-size: 11px;
+        font-weight: 700;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.15s;
+        user-select: none;
+    }
+
+    .priority-pill-low {
+        background: #f1f5f9;
+        color: #64748b;
+        border-color: #e2e8f0;
+    }
+
+    .priority-pill-medium {
+        background: #fefce8;
+        color: #a16207;
+        border-color: #fef08a;
+    }
+
+    .priority-pill-high {
+        background: #fff7ed;
+        color: #ea580c;
+        border-color: #fed7aa;
+    }
+
+    .priority-pill-critical {
+        background: #fef2f2;
+        color: #dc2626;
+        border-color: #fecaca;
+    }
+
+    .priority-pill.active-low {
+        background: #64748b;
+        color: #fff;
+        border-color: #64748b;
+    }
+
+    .priority-pill.active-medium {
+        background: #eab308;
+        color: #fff;
+        border-color: #eab308;
+    }
+
+    .priority-pill.active-high {
+        background: #f97316;
+        color: #fff;
+        border-color: #f97316;
+    }
+
+    .priority-pill.active-critical {
+        background: #ef4444;
+        color: #fff;
+        border-color: #ef4444;
+    }
+
+    /* Divider */
+    .form-divider {
+        height: 1px;
+        background: #f3f4f8;
+        margin: 22px 0;
+    }
+
+    /* ── Submit area ── */
+    .form-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 24px;
+    }
+
+    .btn-submit {
+        flex: 1;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        color: #fff;
+        border: none;
+        padding: 13px 20px;
+        border-radius: 14px;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: opacity 0.15s, transform 0.15s;
+        box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+    }
+
+    .btn-submit:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+    }
+
+    .btn-cancel {
+        border: 1.5px solid #e8e8f0;
+        background: #fff;
+        color: #6b7280;
+        padding: 13px 20px;
+        border-radius: 14px;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        transition: all 0.15s;
+    }
+
+    .btn-cancel:hover {
+        border-color: #d1d5db;
+        color: #374151;
+        background: #f9fafb;
+    }
+
+    /* ── Sidebar tips ── */
+    .tip-card {
+        background: #fff;
+        border-radius: 20px;
+        border: 1.5px solid #f0f0f7;
+        box-shadow: 0 2px 12px rgba(80, 70, 160, 0.05);
+        overflow: hidden;
+        margin-bottom: 14px;
+    }
+
+    .tip-header {
+        padding: 14px 18px;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: #6366f1;
+        background: linear-gradient(135deg, #eef2ff, #f5f3ff);
+        border-bottom: 1px solid #e8e8f0;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+    }
+
+    .tip-body {
+        padding: 16px 18px;
+    }
+
+    .tip-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 9px;
+        margin-bottom: 13px;
+        font-size: 12.5px;
+        color: #6b7280;
+        line-height: 1.55;
+    }
+
+    .tip-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .tip-icon {
+        width: 22px;
+        height: 22px;
+        border-radius: 7px;
+        background: #eef2ff;
+        color: #6366f1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        flex-shrink: 0;
+        margin-top: 1px;
+    }
+
+    /* Status selector visual */
+    .status-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+    }
+
+    .status-option {
+        border: 1.5px solid #e8e8f0;
+        border-radius: 10px;
+        padding: 9px 10px;
+        font-size: 11.5px;
+        font-weight: 600;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.15s;
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        justify-content: center;
+    }
+
+    .status-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .status-option.selected {
+        border-color: #6366f1;
+        background: #eef2ff;
+        color: #4f46e5;
+    }
+
+    .status-option:hover:not(.selected) {
+        border-color: #c7d2fe;
+        background: #f5f7ff;
+    }
+
+    /* Hidden select (real form field) */
+    .real-select {
+        display: none;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 
-<div class="max-w-2xl mx-auto">
-    <div class="flex items-center gap-3 mb-6">
-        <a href="{% url 'task_list' %}" class="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-lg transition">
-            <i class="fa-solid fa-arrow-left"></i>
-        </a>
-        <div>
-            <h2 class="text-xl font-bold text-gray-900">{% if task %}Edit Task{% else %}Create New Task{% endif %}</h2>
-            <p class="text-gray-500 text-sm">{% if task %}Update task details{% else %}Add a new task to your workspace{% endif %}</p>
-        </div>
+<div class="page-nav">
+    <a href="{% url 'task_list' %}" class="back-btn"><i class="fa-solid fa-arrow-left fa-sm"></i></a>
+    <div>
+        <h2>{% if task %}Edit Task{% else %}Create New Task{% endif %}</h2>
+        <p>{% if task %}Update task details below{% else %}Fill in the details to add a new task{% endif %}</p>
     </div>
+</div>
 
-    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-        <form method="post">
-            {% csrf_token %}
+<form method="post" id="taskForm">
+    {% csrf_token %}
 
-            <!-- Title -->
-            <div class="mb-5">
-                <label class="block text-sm font-medium text-gray-700 mb-1.5">Task Title <span class="text-red-500">*</span></label>
-                <input type="text" name="title" value="{{ task.title|default:'' }}" required
-                    placeholder="What needs to be done?"
-                    class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-            </div>
+    <div class="form-layout">
 
-            <!-- Description -->
-            <div class="mb-5">
-                <label class="block text-sm font-medium text-gray-700 mb-1.5">Description</label>
-                <textarea name="description" rows="3" placeholder="Add more details about this task..."
-                    class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none">{{ task.description|default:'' }}</textarea>
-            </div>
-
-            <!-- Status + Priority row -->
-            <div class="grid grid-cols-2 gap-4 mb-5">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Status</label>
-                    <select name="status" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white">
-                        <option value="todo"        {% if task.status == 'todo' %}selected{% endif %}>To Do</option>
-                        <option value="in_progress" {% if task.status == 'in_progress' %}selected{% endif %}>In Progress</option>
-                        <option value="review"      {% if task.status == 'review' %}selected{% endif %}>In Review</option>
-                        <option value="done"        {% if task.status == 'done' %}selected{% endif %}>Done</option>
-                    </select>
+        <!-- Main form -->
+        <div class="form-card">
+            <div class="form-card-header">
+                <div class="form-card-icon">
+                    <i class="fa-solid {% if task %}fa-pen-to-square{% else %}fa-plus{% endif %}"></i>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Priority</label>
-                    <select name="priority" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white">
-                        <option value="low"      {% if task.priority == 'low' %}selected{% endif %}>Low</option>
-                        <option value="medium"   {% if task.priority == 'medium' or not task %}selected{% endif %}>Medium</option>
-                        <option value="high"     {% if task.priority == 'high' %}selected{% endif %}>High</option>
+                    <div class="form-card-title">{% if task %}Update Task{% else %}New Task{% endif %}</div>
+                    <div class="form-card-sub">{% if task %}Editing: {{ task.title|truncatechars:40 }}{% else %}All
+                        fields marked * are required{% endif %}</div>
+                </div>
+            </div>
+            <div class="form-body">
+
+                <!-- Title -->
+                <div class="field-group">
+                    <label class="field-label" for="id_title">Task Title <span class="req">*</span></label>
+                    <input type="text" name="title" id="id_title" value="{{ task.title|default:'' }}"
+                        placeholder="What needs to be done?" class="field-input" required>
+                </div>
+
+                <!-- Description -->
+                <div class="field-group">
+                    <label class="field-label" for="id_desc">Description</label>
+                    <textarea name="description" id="id_desc" rows="4"
+                        placeholder="Add context, acceptance criteria, or notes…"
+                        class="field-textarea">{{ task.description|default:'' }}</textarea>
+                </div>
+
+                <div class="form-divider"></div>
+
+                <!-- Status visual selector -->
+                <div class="field-group">
+                    <label class="field-label">Status</label>
+                    <div class="status-grid" id="statusGrid">
+                        <div class="status-option {% if task.status == 'todo' or not task %}selected{% endif %}"
+                            data-value="todo" onclick="pickStatus('todo')">
+                            <div class="status-dot" style="background:#94a3b8"></div> To Do
+                        </div>
+                        <div class="status-option {% if task.status == 'in_progress' %}selected{% endif %}"
+                            data-value="in_progress" onclick="pickStatus('in_progress')">
+                            <div class="status-dot" style="background:#6366f1"></div> In Progress
+                        </div>
+                        <div class="status-option {% if task.status == 'review' %}selected{% endif %}"
+                            data-value="review" onclick="pickStatus('review')">
+                            <div class="status-dot" style="background:#f59e0b"></div> In Review
+                        </div>
+                        <div class="status-option {% if task.status == 'done' %}selected{% endif %}" data-value="done"
+                            onclick="pickStatus('done')">
+                            <div class="status-dot" style="background:#10b981"></div> Done
+                        </div>
+                    </div>
+                    <select name="status" class="real-select" id="statusSelect">
+                        <option value="todo" {% if task.status == 'todo' or not task %}selected{% endif %}>To Do</option>
+                        <option value="in_progress" {% if task.status == 'in_progress' %}selected{% endif %}>In Progress
+                        </option>
+                        <option value="review" {% if task.status == 'review' %}selected{% endif %}>In Review</option>
+                        <option value="done" {% if task.status == 'done' %}selected{% endif %}>Done</option>
+                    </select>
+                </div>
+
+                <!-- Priority visual pills -->
+                <div class="field-group">
+                    <label class="field-label">Priority</label>
+                    <div class="priority-pills" id="priorityPills">
+                        <div class="priority-pill priority-pill-low {% if task.priority == 'low' %}active-low{% endif %}"
+                            data-value="low" onclick="pickPriority('low')">
+                            <i class="fa-solid fa-arrow-down fa-xs" style="margin-right:3px"></i>Low
+                        </div>
+                        <div class="priority-pill priority-pill-medium {% if task.priority == 'medium' or not task %}active-medium{% endif %}"
+                            data-value="medium" onclick="pickPriority('medium')">
+                            <i class="fa-solid fa-minus fa-xs" style="margin-right:3px"></i>Medium
+                        </div>
+                        <div class="priority-pill priority-pill-high {% if task.priority == 'high' %}active-high{% endif %}"
+                            data-value="high" onclick="pickPriority('high')">
+                            <i class="fa-solid fa-arrow-up fa-xs" style="margin-right:3px"></i>High
+                        </div>
+                        <div class="priority-pill priority-pill-critical {% if task.priority == 'critical' %}active-critical{% endif %}"
+                            data-value="critical" onclick="pickPriority('critical')">
+                            <i class="fa-solid fa-fire fa-xs" style="margin-right:3px"></i>Critical
+                        </div>
+                    </div>
+                    <select name="priority" class="real-select" id="prioritySelect">
+                        <option value="low" {% if task.priority == 'low' %}selected{% endif %}>Low</option>
+                        <option value="medium" {% if task.priority == 'medium' or not task %}selected{% endif %}>Medium
+                        </option>
+                        <option value="high" {% if task.priority == 'high' %}selected{% endif %}>High</option>
                         <option value="critical" {% if task.priority == 'critical' %}selected{% endif %}>Critical</option>
                     </select>
                 </div>
-            </div>
 
-            <!-- Assign + Project row -->
-            <div class="grid grid-cols-2 gap-4 mb-5">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Assign To</label>
-                    <select name="assigned_to" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white">
-                        <option value="">Unassigned</option>
-                        {% for user in users %}
-                        <option value="{{ user.pk }}" {% if task.assigned_to_id == user.pk %}selected{% endif %}>
-                            {{ user.get_full_name|default:user.email }}
-                        </option>
-                        {% endfor %}
-                    </select>
+                <div class="form-divider"></div>
+
+                <!-- Assign + Project -->
+                <div class="field-row">
+                    <div>
+                        <label class="field-label" for="id_assigned_to">Assign To</label>
+                        <select name="assigned_to" id="id_assigned_to" class="field-select">
+                            <option value="">Unassigned</option>
+                            {% for user in users %}
+                            <option value="{{ user.pk }}" {% if task.assigned_to_id == user.pk %}selected{% endif %}>
+                                {{ user.get_full_name|default:user.email }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="field-label" for="id_project">Project</label>
+                        <select name="project" id="id_project" class="field-select">
+                            <option value="">No Project</option>
+                            {% for project in projects %}
+                            <option value="{{ project.pk }}" {% if task.project_id == project.pk %}selected{% endif %}>
+                                {{ project.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Project</label>
-                    <select name="project" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white">
-                        <option value="">No Project</option>
-                        {% for project in projects %}
-                        <option value="{{ project.pk }}" {% if task.project_id == project.pk %}selected{% endif %}>
-                            {{ project.name }}
-                        </option>
-                        {% endfor %}
-                    </select>
+
+                <!-- Due date -->
+                <div class="field-group">
+                    <label class="field-label" for="id_due_date">Due Date</label>
+                    <input type="date" name="due_date" id="id_due_date"
+                        value="{{ task.due_date|date:'Y-m-d'|default:'' }}" class="field-input">
+                </div>
+
+                <!-- Actions -->
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit">
+                        {% if task %}
+                        <i class="fa-solid fa-floppy-disk"></i> Save Changes
+                        {% else %}
+                        <i class="fa-solid fa-plus"></i> Create Task
+                        {% endif %}
+                    </button>
+                    <a href="{% url 'task_list' %}" class="btn-cancel">
+                        <i class="fa-solid fa-xmark"></i> Cancel
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div>
+            <div class="tip-card">
+                <div class="tip-header">
+                    <i class="fa-solid fa-lightbulb"></i> Tips
+                </div>
+                <div class="tip-body">
+                    <div class="tip-item">
+                        <div class="tip-icon"><i class="fa-solid fa-pen"></i></div>
+                        <span>Write clear, action-oriented task titles that start with a verb.</span>
+                    </div>
+                    <div class="tip-item">
+                        <div class="tip-icon"><i class="fa-solid fa-calendar"></i></div>
+                        <span>Set a realistic due date to keep your team on track.</span>
+                    </div>
+                    <div class="tip-item">
+                        <div class="tip-icon"><i class="fa-solid fa-fire"></i></div>
+                        <span>Reserve "Critical" priority for tasks blocking other work.</span>
+                    </div>
+                    <div class="tip-item">
+                        <div class="tip-icon"><i class="fa-solid fa-user"></i></div>
+                        <span>Always assign tasks so ownership is clear.</span>
+                    </div>
                 </div>
             </div>
 
-            <!-- Due date -->
-            <div class="mb-6">
-                <label class="block text-sm font-medium text-gray-700 mb-1.5">Due Date</label>
-                <input type="date" name="due_date" value="{{ task.due_date|date:'Y-m-d'|default:'' }}"
-                    class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+            {% if task %}
+            <div class="tip-card">
+                <div class="tip-header"
+                    style="background:linear-gradient(135deg,#fef2f2,#fef9f9);color:#dc2626;border-color:#fee2e2">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Danger Zone
+                </div>
+                <div class="tip-body">
+                    <p style="font-size:12.5px;color:#9ca3af;margin-bottom:14px;line-height:1.6">Permanently delete this
+                        task and all its comments. This action cannot be undone.</p>
+                    <form method="post" action="{% url 'task_delete' task.pk %}"
+                        onsubmit="return confirm('Delete this task permanently?')">
+                        {% csrf_token %}
+                        <button type="submit"
+                            style="width:100%;padding:10px;border-radius:11px;border:1.5px solid #fecaca;background:#fff;color:#ef4444;font-size:12.5px;font-weight:700;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:7px"
+                            onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='#fff'">
+                            <i class="fa-solid fa-trash"></i> Delete Task
+                        </button>
+                    </form>
+                </div>
             </div>
+            {% endif %}
+        </div>
 
-            <!-- Buttons -->
-            <div class="flex items-center gap-3 pt-2 border-t border-gray-100">
-                <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-sm font-medium transition">
-                    {% if task %}<i class="fa-solid fa-floppy-disk mr-1"></i> Save Changes
-                    {% else %}<i class="fa-solid fa-plus mr-1"></i> Create Task{% endif %}
-                </button>
-                <a href="{% url 'task_list' %}" class="flex-1 text-center border border-gray-200 text-gray-600 hover:bg-gray-50 py-2.5 rounded-xl text-sm font-medium transition">
-                    Cancel
-                </a>
-            </div>
-        </form>
     </div>
-</div>
+</form>
+
+<script>
+    function pickStatus(val) {
+        document.querySelectorAll('#statusGrid .status-option').forEach(el => {
+            el.classList.toggle('selected', el.dataset.value === val);
+        });
+        document.getElementById('statusSelect').value = val;
+    }
+
+    function pickPriority(val) {
+        document.querySelectorAll('#priorityPills .priority-pill').forEach(el => {
+            const pv = el.dataset.value;
+            el.className = `priority-pill priority-pill-${pv}${pv === val ? ` active-${pv}` : ''}`;
+        });
+        document.getElementById('prioritySelect').value = val;
+    }
+</script>
 
 {% endblock %}

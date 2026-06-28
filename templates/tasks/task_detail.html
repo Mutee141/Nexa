@@ -2,65 +2,443 @@
 {% block title %}{{ task.title }} — NexaOps{% endblock %}
 {% block page_title %}Task Detail{% endblock %}
 
+{% block extra_head %}
+<style>
+    .detail-layout {
+        display: grid;
+        grid-template-columns: 1fr 320px;
+        gap: 20px;
+        align-items: start;
+    }
+    @media (max-width: 900px) { .detail-layout { grid-template-columns: 1fr; } }
+
+    /* ── Back nav ── */
+    .page-nav {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 22px;
+    }
+    .back-btn {
+        width: 34px; height: 34px;
+        border-radius: 10px;
+        border: 1.5px solid #e8e8f0;
+        background: #fff;
+        color: #6b7280;
+        display: flex; align-items: center; justify-content: center;
+        text-decoration: none;
+        transition: all 0.15s;
+        flex-shrink: 0;
+    }
+    .back-btn:hover { border-color: #6366f1; color: #6366f1; background: #eef2ff; }
+    .page-nav h2 {
+        font-size: 18px;
+        font-weight: 800;
+        color: #1e1b4b;
+    }
+    .edit-btn {
+        margin-left: auto;
+        background: linear-gradient(135deg,#6366f1,#8b5cf6);
+        color: #fff;
+        font-size: 13px;
+        font-weight: 700;
+        padding: 8px 18px;
+        border-radius: 12px;
+        text-decoration: none;
+        display: flex; align-items: center; gap: 6px;
+        transition: opacity 0.15s, transform 0.15s;
+        box-shadow: 0 4px 14px rgba(99,102,241,0.28);
+    }
+    .edit-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    /* ── Main card ── */
+    .detail-card {
+        background: #fff;
+        border-radius: 20px;
+        border: 1.5px solid #f0f0f7;
+        box-shadow: 0 2px 16px rgba(80,70,160,0.06);
+        overflow: hidden;
+    }
+
+    /* Priority stripe */
+    .detail-priority-stripe {
+        height: 5px;
+        width: 100%;
+    }
+    .stripe-critical { background: linear-gradient(90deg,#ef4444,#f43f5e); }
+    .stripe-high     { background: linear-gradient(90deg,#f97316,#fb923c); }
+    .stripe-medium   { background: linear-gradient(90deg,#eab308,#fbbf24); }
+    .stripe-low      { background: linear-gradient(90deg,#d1d5db,#e5e7eb); }
+
+    .detail-body { padding: 24px 26px; }
+    .detail-title {
+        font-size: 20px;
+        font-weight: 800;
+        color: #1e1b4b;
+        line-height: 1.35;
+        margin-bottom: 10px;
+        letter-spacing: -0.01em;
+    }
+    .detail-desc {
+        font-size: 13.5px;
+        color: #6b7280;
+        line-height: 1.7;
+        margin-bottom: 22px;
+    }
+
+    /* Meta grid */
+    .meta-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1px;
+        background: #f3f4f8;
+        border-radius: 14px;
+        overflow: hidden;
+        border: 1px solid #f0f0f7;
+    }
+    .meta-cell {
+        background: #fff;
+        padding: 14px 18px;
+    }
+    .meta-label {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: #9ca3af;
+        margin-bottom: 5px;
+    }
+    .meta-value {
+        font-size: 13px;
+        font-weight: 600;
+        color: #1e1b4b;
+    }
+    .badge {
+        display: inline-flex;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 3px 11px;
+        border-radius: 20px;
+    }
+    .badge-done       { background:#d1fae5; color:#059669; }
+    .badge-in_progress{ background:#dbeafe; color:#1d4ed8; }
+    .badge-review     { background:#fef3c7; color:#d97706; }
+    .badge-todo       { background:#f1f5f9; color:#64748b; }
+    .badge-critical   { background:#fee2e2; color:#dc2626; }
+    .badge-high       { background:#ffedd5; color:#ea580c; }
+    .badge-medium     { background:#fef9c3; color:#a16207; }
+    .badge-low        { background:#f1f5f9; color:#6b7280; }
+
+    /* Assignee display */
+    .assignee-display { display: flex; align-items: center; gap: 8px; }
+    .assignee-avatar {
+        width: 28px; height: 28px;
+        border-radius: 50%;
+        background: linear-gradient(135deg,#6366f1,#8b5cf6);
+        color: #fff;
+        font-size: 10px;
+        font-weight: 800;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+    }
+
+    /* ── Sidebar stats ── */
+    .sidebar-card {
+        background: #fff;
+        border-radius: 20px;
+        border: 1.5px solid #f0f0f7;
+        box-shadow: 0 2px 12px rgba(80,70,160,0.05);
+        overflow: hidden;
+    }
+    .sidebar-header {
+        padding: 16px 20px 14px;
+        border-bottom: 1px solid #f3f4f8;
+        font-size: 13px;
+        font-weight: 700;
+        color: #1e1b4b;
+        display: flex; align-items: center; gap: 8px;
+    }
+    .sidebar-header i { color: #6366f1; }
+    .sidebar-item {
+        padding: 13px 20px;
+        border-bottom: 1px solid #f9f9fb;
+        display: flex; align-items: center; justify-content: space-between;
+    }
+    .sidebar-item:last-child { border-bottom: none; }
+    .sidebar-key { font-size: 12px; color: #9ca3af; font-weight: 500; }
+    .sidebar-val { font-size: 12px; color: #1e1b4b; font-weight: 600; }
+
+    /* ── Comments ── */
+    .comments-card {
+        background: #fff;
+        border-radius: 20px;
+        border: 1.5px solid #f0f0f7;
+        box-shadow: 0 2px 12px rgba(80,70,160,0.05);
+        margin-top: 20px;
+        overflow: hidden;
+    }
+    .comments-header {
+        padding: 16px 22px;
+        border-bottom: 1px solid #f3f4f8;
+        display: flex; align-items: center; gap: 8px;
+        font-size: 14px;
+        font-weight: 700;
+        color: #1e1b4b;
+    }
+    .comments-header i { color: #6366f1; }
+    .comment-count {
+        font-size: 10px;
+        font-weight: 700;
+        background: #eef2ff;
+        color: #6366f1;
+        padding: 2px 8px;
+        border-radius: 10px;
+    }
+    .comment-item {
+        display: flex;
+        gap: 14px;
+        padding: 16px 22px;
+        border-bottom: 1px solid #f9f9fb;
+        transition: background 0.12s;
+    }
+    .comment-item:hover { background: #fafbff; }
+    .comment-avatar {
+        width: 36px; height: 36px;
+        border-radius: 12px;
+        background: linear-gradient(135deg,#6366f1,#8b5cf6);
+        color: #fff;
+        font-size: 11px;
+        font-weight: 800;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+    }
+    .comment-body { flex: 1; min-width: 0; }
+    .comment-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 5px;
+    }
+    .comment-author { font-size: 13px; font-weight: 700; color: #1e1b4b; }
+    .comment-time { font-size: 11px; color: #9ca3af; margin-left: 8px; }
+    .comment-delete-btn {
+        font-size: 11px;
+        color: #d1d5db;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 3px 7px;
+        border-radius: 7px;
+        transition: all 0.14s;
+    }
+    .comment-delete-btn:hover { background: #fef2f2; color: #ef4444; }
+    .comment-text { font-size: 13px; color: #4b5563; line-height: 1.6; }
+
+    .comment-empty {
+        padding: 36px 22px;
+        text-align: center;
+        color: #d1d5db;
+        font-size: 13px;
+    }
+    .comment-empty i { font-size: 24px; display: block; margin-bottom: 8px; }
+
+    /* Comment form */
+    .comment-form-area {
+        padding: 16px 22px;
+        background: #fafbff;
+        border-top: 1px solid #f3f4f8;
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+    }
+    .comment-form-avatar {
+        width: 36px; height: 36px;
+        border-radius: 12px;
+        background: linear-gradient(135deg,#6366f1,#8b5cf6);
+        color: #fff;
+        font-size: 11px;
+        font-weight: 800;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+    }
+    .comment-input {
+        flex: 1;
+        border: 1.5px solid #e8e8f0;
+        border-radius: 12px;
+        padding: 10px 16px;
+        font-size: 13px;
+        outline: none;
+        background: #fff;
+        transition: border-color 0.15s, box-shadow 0.15s;
+        color: #1e1b4b;
+    }
+    .comment-input:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+    }
+    .comment-submit {
+        background: linear-gradient(135deg,#6366f1,#8b5cf6);
+        color: #fff;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 12px;
+        cursor: pointer;
+        font-size: 13px;
+        transition: opacity 0.15s, transform 0.15s;
+        box-shadow: 0 3px 10px rgba(99,102,241,0.3);
+        flex-shrink: 0;
+    }
+    .comment-submit:hover { opacity: 0.9; transform: translateY(-1px); }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="max-w-2xl mx-auto">
-    <div class="flex items-center gap-3 mb-6">
-        <a href="{% url 'task_list' %}" class="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-lg">
-            <i class="fa-solid fa-arrow-left"></i>
-        </a>
-        <h2 class="text-xl font-bold text-gray-900">Task Detail</h2>
-        <div class="ml-auto flex gap-2">
-            <a href="{% url 'task_edit' task.pk %}" class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm hover:bg-indigo-700 transition">
-                <i class="fa-solid fa-pen-to-square mr-1"></i> Edit
-            </a>
+
+<!-- Nav -->
+<div class="page-nav">
+    <a href="{% url 'task_list' %}" class="back-btn"><i class="fa-solid fa-arrow-left fa-sm"></i></a>
+    <h2>Task Detail</h2>
+    <a href="{% url 'task_edit' task.pk %}" class="edit-btn">
+        <i class="fa-solid fa-pen-to-square"></i> Edit Task
+    </a>
+</div>
+
+<div class="detail-layout">
+
+    <!-- Left: main content -->
+    <div>
+        <div class="detail-card">
+            <div class="detail-priority-stripe stripe-{{ task.priority }}"></div>
+            <div class="detail-body">
+                <div class="detail-title">{{ task.title }}</div>
+                {% if task.description %}
+                <p class="detail-desc">{{ task.description }}</p>
+                {% endif %}
+
+                <div class="meta-grid">
+                    <div class="meta-cell">
+                        <div class="meta-label">Status</div>
+                        <span class="badge badge-{{ task.status }}">{{ task.get_status_display }}</span>
+                    </div>
+                    <div class="meta-cell">
+                        <div class="meta-label">Priority</div>
+                        <span class="badge badge-{{ task.priority }}">{{ task.get_priority_display }}</span>
+                    </div>
+                    <div class="meta-cell">
+                        <div class="meta-label">Assigned To</div>
+                        {% if task.assigned_to %}
+                        <div class="assignee-display">
+                            <div class="assignee-avatar">
+                                {{ task.assigned_to.first_name|first|upper }}{{ task.assigned_to.last_name|first|upper }}
+                            </div>
+                            <span class="meta-value">{{ task.assigned_to.get_full_name }}</span>
+                        </div>
+                        {% else %}
+                        <span class="meta-value" style="color:#9ca3af">Unassigned</span>
+                        {% endif %}
+                    </div>
+                    <div class="meta-cell">
+                        <div class="meta-label">Project</div>
+                        <span class="meta-value">{{ task.project.name|default:"No Project" }}</span>
+                    </div>
+                    <div class="meta-cell">
+                        <div class="meta-label">Due Date</div>
+                        <span class="meta-value">{{ task.due_date|date:"M d, Y"|default:"Not set" }}</span>
+                    </div>
+                    <div class="meta-cell">
+                        <div class="meta-label">Created</div>
+                        <span class="meta-value">{{ task.created_at|date:"M d, Y" }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comments -->
+        <div class="comments-card">
+            <div class="comments-header">
+                <i class="fa-solid fa-comments"></i>
+                Comments
+                <span class="comment-count">{{ task.comments.count }}</span>
+            </div>
+            <div>
+                {% for comment in task.comments.all %}
+                <div class="comment-item">
+                    <div class="comment-avatar">
+                        {{ comment.author.first_name|first|upper }}{{ comment.author.last_name|first|upper }}
+                    </div>
+                    <div class="comment-body">
+                        <div class="comment-meta">
+                            <div>
+                                <span class="comment-author">{{ comment.author.get_full_name|default:comment.author.email }}</span>
+                                <span class="comment-time">{{ comment.created_at|timesince }} ago</span>
+                            </div>
+                            {% if comment.author == request.user %}
+                            <form method="post" action="{% url 'delete_comment' comment.pk %}" onsubmit="return confirm('Delete this comment?')" style="margin:0">
+                                {% csrf_token %}
+                                <button type="submit" class="comment-delete-btn" title="Delete">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                        <p class="comment-text">{{ comment.content }}</p>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="comment-empty">
+                    <i class="fa-regular fa-comment-dots"></i>
+                    No comments yet — be the first to add one!
+                </div>
+                {% endfor %}
+            </div>
+            <div class="comment-form-area">
+                <div class="comment-form-avatar">
+                    {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
+                </div>
+                <form method="post" action="{% url 'add_comment' task.pk %}" style="flex:1;display:flex;gap:8px;margin:0">
+                    {% csrf_token %}
+                    <input type="text" name="content" class="comment-input"
+                        placeholder="Write a comment… use @name to mention someone" required>
+                    <button type="submit" class="comment-submit">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 
-    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-        <h3 class="text-xl font-bold text-gray-900 mb-2">{{ task.title }}</h3>
-
-        {% if task.description %}
-        <p class="text-gray-500 text-sm mb-5 leading-relaxed">{{ task.description }}</p>
-        {% endif %}
-
-        <div class="grid grid-cols-2 gap-4 py-4 border-t border-b border-gray-100 my-4">
-            <div>
-                <p class="text-xs text-gray-400 uppercase tracking-wider mb-1">Status</p>
-                <span class="text-sm px-3 py-1 rounded-full font-medium
-                    {% if task.status == 'done' %}bg-green-100 text-green-700
-                    {% elif task.status == 'in_progress' %}bg-blue-100 text-blue-700
-                    {% elif task.status == 'review' %}bg-amber-100 text-amber-700
-                    {% else %}bg-gray-100 text-gray-600{% endif %}">
-                    {{ task.get_status_display }}
-                </span>
+    <!-- Right: sidebar -->
+    <div>
+        <div class="sidebar-card">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-circle-info"></i> Task Info
             </div>
-            <div>
-                <p class="text-xs text-gray-400 uppercase tracking-wider mb-1">Priority</p>
-                <span class="text-sm px-3 py-1 rounded-full font-medium
-                    {% if task.priority == 'critical' %}bg-red-100 text-red-700
-                    {% elif task.priority == 'high' %}bg-orange-100 text-orange-700
-                    {% elif task.priority == 'medium' %}bg-yellow-100 text-yellow-700
-                    {% else %}bg-gray-100 text-gray-500{% endif %}">
-                    {{ task.get_priority_display }}
-                </span>
+            <div class="sidebar-item">
+                <span class="sidebar-key">Task ID</span>
+                <span class="sidebar-val">#{{ task.pk }}</span>
             </div>
-            <div>
-                <p class="text-xs text-gray-400 uppercase tracking-wider mb-1">Assigned To</p>
-                <p class="text-sm text-gray-700 font-medium">{{ task.assigned_to.get_full_name|default:"Unassigned" }}</p>
+            <div class="sidebar-item">
+                <span class="sidebar-key">Created</span>
+                <span class="sidebar-val">{{ task.created_at|date:"M d, Y" }}</span>
             </div>
-            <div>
-                <p class="text-xs text-gray-400 uppercase tracking-wider mb-1">Project</p>
-                <p class="text-sm text-gray-700 font-medium">{{ task.project.name|default:"No Project" }}</p>
+            {% if task.due_date %}
+            <div class="sidebar-item">
+                <span class="sidebar-key">Due Date</span>
+                <span class="sidebar-val">{{ task.due_date|date:"M d, Y" }}</span>
             </div>
-            <div>
-                <p class="text-xs text-gray-400 uppercase tracking-wider mb-1">Due Date</p>
-                <p class="text-sm text-gray-700 font-medium">{{ task.due_date|date:"M d, Y"|default:"No due date" }}</p>
+            {% endif %}
+            <div class="sidebar-item">
+                <span class="sidebar-key">Comments</span>
+                <span class="sidebar-val">{{ task.comments.count }}</span>
             </div>
-            <div>
-                <p class="text-xs text-gray-400 uppercase tracking-wider mb-1">Created</p>
-                <p class="text-sm text-gray-700 font-medium">{{ task.created_at|date:"M d, Y" }}</p>
+            {% if task.project %}
+            <div class="sidebar-item">
+                <span class="sidebar-key">Project</span>
+                <span class="sidebar-val">{{ task.project.name }}</span>
             </div>
+            {% endif %}
         </div>
     </div>
+
 </div>
 {% endblock %}

@@ -48,6 +48,21 @@ INSTALLED_APPS = [
     'meetings',
     'dashboard',
     'projects',
+    'notifications',
+    'analytics',
+    'billing',
+    'landing',
+    'timetracking',
+    'invites',
+    'audit',
+    'api',
+    'onboarding',
+    'slack_integration',
+    
+    'rest_framework',
+    'rest_framework.authtoken',
+    'drf_yasg',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -60,6 +75,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
+    'accounts.middleware.OnboardingMiddleware',
 ]
 
 ROOT_URLCONF = 'saas.urls'
@@ -135,10 +151,68 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Auth / allauth
 SITE_ID = 1
 LOGIN_REDIRECT_URL = '/dashboard/'
-LOGOUT_REDIRECT_URL = '/accounts/login/'
+LOGOUT_REDIRECT_URL = '/'
 ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_LOGOUT_ON_GET = True
 ACCOUNT_LOGIN_METHODS = {'email'}
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
+SOCIALACCOUNT_LOGIN_ON_GET = True
 
 # API Keys
 OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '')
+
+# OAuth認証設定
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'APP': {
+            'client_id': os.environ.get('GOOGLE_OAUTH_CLIENT_ID', ''),
+            'secret': os.environ.get('GOOGLE_OAUTH_CLIENT_SECRET', ''),
+            'key': ''
+        }
+    },
+    
+}
+
+
+# Add these email settings at the bottom
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # prints to terminal for now
+DEFAULT_FROM_EMAIL = 'NexaOps <noreply@nexaops.com>'
+SITE_URL = 'http://127.0.0.1:8000'
+
+
+import stripe
+
+STRIPE_PUBLISHABLE_KEY    = os.getenv('STRIPE_PUBLISHABLE_KEY', '')
+STRIPE_SECRET_KEY         = os.getenv('STRIPE_SECRET_KEY', '')
+STRIPE_WEBHOOK_SECRET     = os.getenv('STRIPE_WEBHOOK_SECRET', '')
+STRIPE_PRO_PRICE_ID       = os.getenv('STRIPE_PRO_PRICE_ID', '')
+STRIPE_ENTERPRISE_PRICE_ID= os.getenv('STRIPE_ENTERPRISE_PRICE_ID', '')
+
+stripe.api_key = STRIPE_SECRET_KEY
+
+SITE_URL = os.getenv('SITE_URL', 'http://127.0.0.1:8000')
+
+
+SLACK_BOT_TOKEN = os.getenv('SLACK_BOT_TOKEN', '')
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'user': '1000/day',
+    },
+}

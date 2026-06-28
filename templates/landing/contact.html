@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact — NexaOps</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; overflow-x: hidden; background: #050508; }
+
+        .aurora-bg {
+            position: fixed; inset: 0; z-index: 0;
+            background: radial-gradient(ellipse 80% 50% at 20% -10%, rgba(99,102,241,0.22), transparent),
+                        radial-gradient(ellipse 60% 50% at 90% 10%, rgba(168,85,247,0.18), transparent),
+                        radial-gradient(ellipse 60% 50% at 50% 100%, rgba(34,211,238,0.1), transparent),
+                        #050508;
+            animation: auroraShift 18s ease-in-out infinite;
+        }
+        @keyframes auroraShift {
+            0%, 100% { filter: hue-rotate(0deg) brightness(1); }
+            50% { filter: hue-rotate(20deg) brightness(1.08); }
+        }
+
+        .orb {
+            position: fixed; border-radius: 50%; filter: blur(80px);
+            opacity: 0.45; pointer-events: none; z-index: 0;
+        }
+        .orb1 { width: 450px; height: 450px; background: radial-gradient(circle, #6366f1, transparent 70%); top: -150px; left: -100px; animation: floatOrb1 14s ease-in-out infinite; }
+        .orb2 { width: 380px; height: 380px; background: radial-gradient(circle, #a855f7, transparent 70%); bottom: -120px; right: -100px; animation: floatOrb2 16s ease-in-out infinite; }
+        @keyframes floatOrb1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(60px,40px)} }
+        @keyframes floatOrb2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-50px,60px)} }
+
+        .grid-overlay {
+            position: fixed; inset: 0; z-index: 0;
+            background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+                               linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+            background-size: 60px 60px;
+            mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 80%);
+        }
+
+        .nav-glass {
+            background: rgba(5,5,8,0.7);
+            backdrop-filter: blur(20px) saturate(150%);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .glass-card {
+            background: rgba(255,255,255,0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+        }
+        .glass-card:hover {
+            background: rgba(255,255,255,0.045);
+            border-color: rgba(99,102,241,0.3);
+            transform: translateY(-4px);
+        }
+
+        .btn-glow {
+            position: relative;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            box-shadow: 0 10px 40px -10px rgba(99,102,241,0.7);
+            transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+        }
+        .btn-glow:hover {
+            transform: translateY(-2px) scale(1.01);
+            box-shadow: 0 20px 50px -10px rgba(99,102,241,0.9);
+        }
+
+        .field-dark {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #fff;
+            transition: all 0.2s ease;
+        }
+        .field-dark:focus {
+            outline: none;
+            border-color: rgba(99,102,241,0.6);
+            background: rgba(255,255,255,0.06);
+            box-shadow: 0 0 0 4px rgba(99,102,241,0.12);
+        }
+        .field-dark::placeholder { color: rgba(255,255,255,0.3); }
+
+        .pulse-live { position: relative; }
+        .pulse-live::before {
+            content: ''; position: absolute; inset: -4px; border-radius: 50%;
+            background: currentColor; opacity: 0.3;
+            animation: pulseLive 2s ease-out infinite;
+        }
+        @keyframes pulseLive { 0%{transform:scale(1);opacity:0.5} 100%{transform:scale(2.2);opacity:0} }
+
+        .icon-glow { box-shadow: 0 0 30px -8px currentColor; }
+    </style>
+</head>
+<body class="text-white">
+
+<div class="aurora-bg"></div>
+<div class="grid-overlay"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+
+<div style="position:relative;z-index:10">
+
+<!-- NAVBAR -->
+<nav class="nav-glass fixed top-0 left-0 right-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,#6366f1,#a855f7);box-shadow:0 0 20px rgba(99,102,241,0.5)">
+                <i class="fa-solid fa-brain text-white text-sm"></i>
+            </div>
+            <span class="font-bold text-white text-xl">NexaOps</span>
+        </a>
+        <a href="{% url 'account_signup' %}" class="btn-glow text-white px-4 py-2 rounded-xl text-sm font-semibold">
+            Get started free
+        </a>
+    </div>
+</nav>
+
+<!-- HEADER -->
+<div class="max-w-5xl mx-auto px-6 pt-36 pb-4">
+    <div class="text-center mb-12" data-aos="fade-up">
+        <div class="inline-flex items-center gap-2 text-indigo-300 text-xs font-semibold px-4 py-2 rounded-full mb-6" style="background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.25)">
+            <span class="w-2 h-2 bg-indigo-400 rounded-full pulse-live text-indigo-400"></span>
+            We're online and ready to help
+        </div>
+        <h1 class="text-4xl lg:text-5xl font-black text-white mb-3">Get in touch</h1>
+        <p class="text-gray-400 text-lg">We usually reply within a few hours.</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 pb-24">
+
+        <!-- Contact info -->
+        <div class="lg:col-span-2 space-y-5" data-aos="fade-right">
+            <div class="glass-card rounded-2xl p-5 flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 icon-glow" style="background:rgba(99,102,241,0.15);color:#6366f1">
+                    <i class="fa-solid fa-envelope text-indigo-400"></i>
+                </div>
+                <div>
+                    <p class="font-semibold text-white text-sm">Email us</p>
+                    <p class="text-gray-400 text-sm">hello@nexaops.com</p>
+                </div>
+            </div>
+            <div class="glass-card rounded-2xl p-5 flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 icon-glow" style="background:rgba(16,185,129,0.15);color:#10b981">
+                    <i class="fa-solid fa-clock text-emerald-400"></i>
+                </div>
+                <div>
+                    <p class="font-semibold text-white text-sm">Response time</p>
+                    <p class="text-gray-400 text-sm">Usually within 24 hours</p>
+                </div>
+            </div>
+
+            <!-- AI promo card -->
+            <div class="rounded-2xl p-5 relative overflow-hidden" style="background:linear-gradient(135deg,rgba(99,102,241,0.2),rgba(168,85,247,0.12));border:1px solid rgba(99,102,241,0.3)">
+                <div class="w-11 h-11 rounded-xl flex items-center justify-center mb-3" style="background:linear-gradient(135deg,#6366f1,#a855f7);box-shadow:0 0 25px rgba(99,102,241,0.5)">
+                    <i class="fa-solid fa-robot text-white"></i>
+                </div>
+                <p class="font-bold text-white mb-1.5">Try the AI Assistant</p>
+                <p class="text-gray-300 text-sm mb-4">Already a user? Ask our AI for instant help.</p>
+                {% if user.is_authenticated %}
+                <a href="{% url 'ai_assistant' %}" class="block text-center bg-white text-indigo-700 py-2.5 rounded-xl text-sm font-bold hover:bg-indigo-50 transition">
+                    Open AI Chat
+                </a>
+                {% else %}
+                <a href="{% url 'account_signup' %}" class="block text-center bg-white text-indigo-700 py-2.5 rounded-xl text-sm font-bold hover:bg-indigo-50 transition">
+                    Sign up free
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Contact form -->
+        <div class="lg:col-span-3 glass-card rounded-2xl p-8" data-aos="fade-left">
+
+            {% if messages %}
+            {% for message in messages %}
+            <div class="mb-5 px-4 py-3 rounded-xl text-sm flex items-center gap-2" style="background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);color:#6ee7b7">
+                <i class="fa-solid fa-circle-check"></i> {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <h2 class="text-xl font-bold text-white mb-6">Send us a message</h2>
+            <form method="post">
+                {% csrf_token %}
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1.5">Your Name</label>
+                        <input type="text" name="name" required placeholder="John Doe"
+                            class="field-dark w-full rounded-xl px-4 py-2.5 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1.5">Email</label>
+                        <input type="email" name="email" required placeholder="john@company.com"
+                            class="field-dark w-full rounded-xl px-4 py-2.5 text-sm">
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-300 mb-1.5">Subject</label>
+                    <select name="subject" class="field-dark w-full rounded-xl px-4 py-2.5 text-sm">
+                        <option style="background:#0a0a12">General Question</option>
+                        <option style="background:#0a0a12">Pricing & Plans</option>
+                        <option style="background:#0a0a12">Technical Support</option>
+                        <option style="background:#0a0a12">Enterprise Sales</option>
+                        <option style="background:#0a0a12">Partnership</option>
+                    </select>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-300 mb-1.5">Message</label>
+                    <textarea name="message" rows="5" required placeholder="Tell us how we can help..."
+                        class="field-dark w-full rounded-xl px-4 py-2.5 text-sm resize-none"></textarea>
+                </div>
+                <button type="submit" class="btn-glow w-full text-white py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-paper-plane"></i> Send Message
+                </button>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="border-t py-8 text-center text-sm" style="border-color:rgba(255,255,255,0.06)">
+    <p class="text-gray-500">© 2026 NexaOps ·
+        <a href="/" class="hover:text-white transition">Home</a> ·
+        <a href="{% url 'landing_about' %}" class="hover:text-white transition">About</a> ·
+        <a href="{% url 'pricing_page' %}" class="hover:text-white transition">Pricing</a>
+    </p>
+</footer>
+
+</div>
+
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+    AOS.init({ duration: 700, easing: 'ease-out-cubic', once: true, offset: 40 });
+</script>
+
+</body>
+</html>

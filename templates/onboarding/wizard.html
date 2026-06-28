@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to NexaOps</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>body{font-family:'Inter',sans-serif}</style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center p-4">
+
+<div class="w-full max-w-lg">
+
+    <!-- Progress bar -->
+    <div class="flex items-center gap-2 mb-8">
+        {% for i in '1234' %}
+        <div class="flex-1 h-1.5 rounded-full {% if i|add:0 <= step %}bg-indigo-600{% else %}bg-gray-200{% endif %} transition-all"></div>
+        {% endfor %}
+    </div>
+
+    <div class="bg-white rounded-3xl shadow-xl border border-gray-100 p-8">
+
+        {% if messages %}
+        {% for message in messages %}
+        <div class="mb-4 px-4 py-3 rounded-xl text-sm bg-green-50 text-green-700 border border-green-100">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+
+        <!-- STEP 1: Profile -->
+        {% if step == 1 %}
+        <div class="text-center mb-6">
+            <div class="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-indigo-200">
+                <i class="fa-solid fa-user text-white text-xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-900">Welcome to NexaOps! 👋</h1>
+            <p class="text-gray-500 text-sm mt-1">Let's set up your profile first</p>
+        </div>
+        <form method="post" action="{% url 'onboarding_step1' %}">
+            {% csrf_token %}
+            <div class="grid grid-cols-2 gap-3 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">First Name</label>
+                    <input type="text" name="first_name" required placeholder="John"
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Last Name</label>
+                    <input type="text" name="last_name" placeholder="Doe"
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+            </div>
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Job Title</label>
+                <input type="text" name="job_title" placeholder="e.g. CEO, Product Manager, Founder"
+                    class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl text-sm font-bold transition">
+                Continue → <span class="text-indigo-200 text-xs">(1 of 4)</span>
+            </button>
+        </form>
+        {% endif %}
+
+        <!-- STEP 2: Invite team -->
+        {% if step == 2 %}
+        <div class="text-center mb-6">
+            <div class="w-14 h-14 bg-violet-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-violet-200">
+                <i class="fa-solid fa-user-plus text-white text-xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-900">Invite your team</h1>
+            <p class="text-gray-500 text-sm mt-1">Work is better together. Invite a teammate (optional)</p>
+        </div>
+        <form method="post" action="{% url 'onboarding_step2' %}">
+            {% csrf_token %}
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Teammate's Email</label>
+                <input type="email" name="email" placeholder="colleague@company.com"
+                    class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+            <div class="flex gap-3">
+                <a href="?step=3" class="flex-1 text-center border border-gray-200 text-gray-600 hover:bg-gray-50 py-3 rounded-xl text-sm font-medium transition">
+                    Skip for now
+                </a>
+                <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl text-sm font-bold transition">
+                    Send Invite →
+                </button>
+            </div>
+        </form>
+        {% endif %}
+
+        <!-- STEP 3: Create project -->
+        {% if step == 3 %}
+        <div class="text-center mb-6">
+            <div class="w-14 h-14 bg-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-200">
+                <i class="fa-solid fa-diagram-project text-white text-xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-900">Create your first project</h1>
+            <p class="text-gray-500 text-sm mt-1">What are you working on?</p>
+        </div>
+        <form method="post" action="{% url 'onboarding_step3' %}">
+            {% csrf_token %}
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Project Name</label>
+                <input type="text" name="project_name" placeholder="e.g. Website Redesign, Q3 Launch"
+                    class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Description (optional)</label>
+                <textarea name="project_description" rows="2" placeholder="Brief description..."
+                    class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"></textarea>
+            </div>
+            <div class="flex gap-3">
+                <a href="?step=4" class="flex-1 text-center border border-gray-200 text-gray-600 hover:bg-gray-50 py-3 rounded-xl text-sm font-medium transition">
+                    Skip for now
+                </a>
+                <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl text-sm font-bold transition">
+                    Create →
+                </button>
+            </div>
+        </form>
+        {% endif %}
+
+        <!-- STEP 4: First task -->
+        {% if step == 4 %}
+        <div class="text-center mb-6">
+            <div class="w-14 h-14 bg-amber-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-amber-200">
+                <i class="fa-solid fa-list-check text-white text-xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-900">Add your first task</h1>
+            <p class="text-gray-500 text-sm mt-1">You're almost ready to go!</p>
+        </div>
+        <form method="post" action="{% url 'onboarding_step4' %}">
+            {% csrf_token %}
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Task Title</label>
+                <input type="text" name="task_title" placeholder="e.g. Set up project plan, Review requirements"
+                    class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl text-sm font-bold transition">
+                🎉 Finish Setup
+            </button>
+        </form>
+        {% endif %}
+
+        <!-- Skip all link -->
+        {% if step < 4 %}
+        <p class="text-center mt-4">
+            <a href="{% url 'skip_onboarding' %}" class="text-xs text-gray-400 hover:text-gray-600">Skip onboarding entirely</a>
+        </p>
+        {% endif %}
+
+    </div>
+</div>
+
+</body>
+</html>

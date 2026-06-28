@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% block title %}Calendar — NexaOps{% endblock %}
+{% block page_title %}Calendar{% endblock %}
+
+{% block extra_head %}
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css' rel='stylesheet' />
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+<style>
+    #calendar {
+        min-height: 650px;
+    }
+
+    .fc {
+        font-family: 'Inter', sans-serif;
+    }
+
+    .fc .fc-toolbar-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    .fc .fc-button {
+        background: #6366f1;
+        border-color: #6366f1;
+        font-size: 12px;
+        border-radius: 10px;
+        padding: 6px 14px;
+    }
+
+    .fc .fc-button:hover {
+        background: #4f46e5;
+        border-color: #4f46e5;
+    }
+
+    .fc .fc-button-active {
+        background: #4338ca !important;
+        border-color: #4338ca !important;
+    }
+
+    .fc .fc-daygrid-event {
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 2px 6px;
+    }
+
+    .fc .fc-day-today {
+        background: rgba(99, 102, 241, 0.04) !important;
+    }
+
+    .fc th {
+        font-size: 12px;
+        font-weight: 600;
+        color: #64748b;
+        padding: 10px 0;
+    }
+
+    .fc .fc-daygrid-day-number {
+        font-size: 13px;
+        font-weight: 500;
+        color: #374151;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="flex items-center justify-between mb-5">
+    <div>
+        <h2 class="text-2xl font-extrabold text-gray-900">Calendar</h2>
+        <p class="text-gray-400 text-sm mt-1">All tasks and meetings in one view</p>
+    </div>
+    <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2 text-xs">
+            <span class="w-3 h-3 rounded-full bg-indigo-500 inline-block"></span> Task
+            <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block ml-2"></span> Meeting
+        </div>
+        <a href="/tasks/create/"
+            class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-indigo-700 transition">
+            <i class="fa-solid fa-plus mr-1"></i> New Task
+        </a>
+    </div>
+</div>
+
+<div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+    <div id="calendar"></div>
+</div>
+
+{{ events|json_script:'calendar-events' }}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const eventsEl = document.getElementById('calendar-events');
+        const events = eventsEl ? JSON.parse(eventsEl.textContent) : [];
+        const calendarEl = document.getElementById('calendar');
+        if (!calendarEl) return;
+
+        const cal = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,listWeek'
+            },
+            events: events,
+            eventClick: function (info) {
+                if (info.event.url) {
+                    info.jsEvent.preventDefault();
+                    window.location.href = info.event.url;
+                }
+            },
+            height: 'auto',
+            eventDisplay: 'block',
+        });
+    cal.render();
+});
+</script>
+{% endblock %}

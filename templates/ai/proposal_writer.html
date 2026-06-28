@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% block title %}AI Proposal Writer — NexaOps{% endblock %}
+{% block page_title %}AI Proposal Writer{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="flex items-center gap-3 mb-6">
+        <a href="{% url 'ai_assistant' %}" class="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-lg">
+            <i class="fa-solid fa-arrow-left"></i>
+        </a>
+        <div>
+            <h2 class="text-xl font-extrabold text-gray-900">AI Proposal Writer</h2>
+            <p class="text-gray-400 text-sm">Generate professional client proposals from your project data</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-sliders text-indigo-500"></i> Proposal Details
+            </h3>
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-4">
+                    <label class="block text-xs font-medium text-gray-600 mb-1.5">Based on Project (optional)</label>
+                    <select name="project"
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                        <option value="">No specific project</option>
+                        {% for p in projects %}
+                        <option value="{{ p.pk }}">{{ p.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-xs font-medium text-gray-600 mb-1.5">Client Name <span
+                            class="text-red-500">*</span></label>
+                    <input type="text" name="client_name" required placeholder="e.g. Acme Corporation"
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1.5">Budget Range</label>
+                        <input type="text" name="budget" placeholder="e.g. $5,000 - $10,000"
+                            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1.5">Timeline</label>
+                        <input type="text" name="timeline" placeholder="e.g. 6 weeks"
+                            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                </div>
+                <div class="mb-5">
+                    <label class="block text-xs font-medium text-gray-600 mb-1.5">Additional Notes</label>
+                    <textarea name="notes" rows="3" placeholder="Special requirements, client context..."
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"></textarea>
+                </div>
+                <button type="submit"
+                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-sm font-bold transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-robot"></i> Generate Proposal
+                </button>
+            </form>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-bold text-gray-800 flex items-center gap-2">
+                    <i class="fa-solid fa-file-contract text-indigo-500"></i> Generated Proposal
+                </h3>
+                {% if result %}
+                <button
+                    onclick="navigator.clipboard.writeText(document.getElementById('proposal-output').textContent).then(()=>alert('Copied!'))"
+                    class="text-xs border border-gray-200 text-gray-500 hover:bg-gray-50 px-3 py-1.5 rounded-lg transition">
+                    <i class="fa-solid fa-copy mr-1"></i> Copy
+                </button>
+                {% endif %}
+            </div>
+            {% if result %}
+            <div id="proposal-output"
+                class="bg-indigo-50 rounded-xl p-4 border border-indigo-100 text-sm text-gray-800 whitespace-pre-wrap leading-relaxed font-sans overflow-y-auto"
+                style="max-height:500px">{{ result }}</div>
+            {% else %}
+            <div class="flex flex-col items-center justify-center h-64 text-gray-200">
+                <i class="fa-solid fa-file-contract text-5xl mb-3"></i>
+                <p class="text-sm text-gray-400">Fill the form and click Generate</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block title %}Audit Log — NexaOps{% endblock %}
+{% block page_title %}Audit Log{% endblock %}
+
+{% block content %}
+
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h2 class="text-2xl font-extrabold text-gray-900">Audit Log</h2>
+        <p class="text-gray-400 text-sm mt-1">Complete history of all actions in your workspace</p>
+    </div>
+    <a href="{% url 'export_audit_csv' %}" class="flex items-center gap-2 border border-gray-200 text-gray-600 hover:bg-gray-50 px-4 py-2.5 rounded-xl text-sm font-medium transition">
+        <i class="fa-solid fa-file-csv"></i> Export CSV
+    </a>
+</div>
+
+<!-- Stats -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 text-center">
+        <p class="text-2xl font-black text-gray-900">{{ total }}</p>
+        <p class="text-xs text-gray-400 mt-1">Total Actions</p>
+    </div>
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 text-center">
+        <p class="text-2xl font-black text-emerald-600">{{ logs|length }}</p>
+        <p class="text-xs text-gray-400 mt-1">Shown (max 200)</p>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 mb-5 flex flex-wrap gap-3 items-center">
+    <form method="get" class="flex flex-wrap gap-3 items-center w-full">
+        <select name="action" onchange="this.form.submit()" class="border border-gray-200 rounded-xl px-3 py-2 text-xs bg-white">
+            <option value="">All actions</option>
+            <option value="create" {% if selected_action == 'create' %}selected{% endif %}>Created</option>
+            <option value="update" {% if selected_action == 'update' %}selected{% endif %}>Updated</option>
+            <option value="delete" {% if selected_action == 'delete' %}selected{% endif %}>Deleted</option>
+        </select>
+        <select name="user" onchange="this.form.submit()" class="border border-gray-200 rounded-xl px-3 py-2 text-xs bg-white">
+            <option value="">All users</option>
+            {% for u in users %}
+            <option value="{{ u.pk }}" {% if selected_user == u.pk|stringformat:"s" %}selected{% endif %}>{{ u.get_full_name|default:u.email }}</option>
+            {% endfor %}
+        </select>
+        <select name="model" onchange="this.form.submit()" class="border border-gray-200 rounded-xl px-3 py-2 text-xs bg-white">
+            <option value="">All types</option>
+            {% for m in models %}
+            <option value="{{ m }}" {% if selected_model == m %}selected{% endif %}>{{ m }}</option>
+            {% endfor %}
+        </select>
+        {% if selected_action or selected_user or selected_model %}
+        <a href="{% url 'audit_log_list' %}" class="text-xs text-gray-400 hover:text-gray-600">Clear filters</a>
+        {% endif %}
+    </form>
+</div>
+
+<!-- Log table -->
+<div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+    <table class="w-full text-sm">
+        <thead class="bg-gray-50 border-b border-gray-100">
+            <tr>
+                <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Action</th>
+                <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">User</th>
+                <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Object</th>
+                <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">IP Address</th>
+                <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Time</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-50">
+            {% for log in logs %}
+            <tr class="hover:bg-gray-50 transition">
+                <td class="px-5 py-3">
+                    <span class="flex items-center gap-2 text-xs font-semibold px-2.5 py-1 rounded-full w-fit
+                        {% if log.get_color == 'green' %}bg-green-100 text-green-700
+                        {% elif log.get_color == 'blue' %}bg-blue-100 text-blue-700
+                        {% elif log.get_color == 'red' %}bg-red-100 text-red-600
+                        {% elif log.get_color == 'indigo' %}bg-indigo-100 text-indigo-700
+                        {% else %}bg-gray-100 text-gray-500{% endif %}">
+                        <i class="fa-solid {{ log.get_icon }} text-xs"></i>
+                        {{ log.get_action_display }}
+                    </span>
+                </td>
+                <td class="px-4 py-3 text-gray-700">{{ log.user.get_full_name|default:log.user.email|default:"System" }}</td>
+                <td class="px-4 py-3 text-gray-600">
+                    <span class="text-xs bg-gray-100 px-2 py-0.5 rounded-lg mr-1">{{ log.model_name }}</span>
+                    {{ log.object_repr|truncatechars:40 }}
+                </td>
+                <td class="px-4 py-3 text-gray-400 text-xs font-mono">{{ log.ip_address|default:"—" }}</td>
+                <td class="px-4 py-3 text-gray-400 text-xs">{{ log.timestamp|date:"M d, Y g:i A" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="px-5 py-16 text-center text-gray-400">
+                <i class="fa-solid fa-clipboard-list text-3xl mb-2 block text-gray-200"></i>
+                No audit logs yet
+            </td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

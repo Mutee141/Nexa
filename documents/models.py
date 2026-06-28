@@ -26,5 +26,26 @@ class Document(models.Model):
     def __str__(self):
         return self.title
 
+    def get_file_extension(self):
+        """Return the uppercase file extension (e.g. 'PDF', 'DOCX')."""
+        import os
+        if self.file:
+            _, ext = os.path.splitext(self.file.name)
+            return ext.lstrip('.').upper()
+        return ''
+
+    def get_file_size(self):
+        """Return a human-readable file size string (e.g. '1.2 MB')."""
+        try:
+            size = self.file.size
+            if size < 1024:
+                return f'{size} B'
+            elif size < 1024 ** 2:
+                return f'{size / 1024:.1f} KB'
+            else:
+                return f'{size / 1024 ** 2:.1f} MB'
+        except Exception:
+            return ''
+
     class Meta:
         ordering = ['-created_at']

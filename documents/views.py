@@ -5,6 +5,7 @@ from django.http import JsonResponse
 from django.conf import settings
 from .models import Document
 import os
+from notifications.utils import notify_document_upload
 
 
 @login_required
@@ -44,13 +45,14 @@ def document_upload(request):
             messages.error(request, 'Title and file are required.')
             return redirect('document_upload')
 
-        Document.objects.create(
+        doc = Document.objects.create(
             title=title,
             description=description,
             category=category,
             file=file,
             uploaded_by=request.user,
         )
+        notify_document_upload(doc)
         messages.success(request, f'Document "{title}" uploaded successfully!')
         return redirect('document_list')
 
@@ -96,3 +98,17 @@ def document_summarize(request, pk):
             return JsonResponse({'error': str(e)}, status=500)
 
     return JsonResponse({'error': 'POST required'}, status=405)
+
+
+@login_required
+def document_edit(request, pk):
+    doc = get_object_or_404(Document, pk=pk)
+    if request.method == 'POST':
+        doc.title = request.POST.get('title', doc.title)
+        doc.description = request.POST.get('description', doc.description)
+        doc.category = request.POST.get('category', doc.category)
+        doc.save()
+        messages.success(request, f'Document "{doc.title}" updated.')
+        return redirect('document_list')
+
+    return render(request, 'documents/document_form.html', {'document': doc, 'categories': Document.CATEGORY_CHOICES})

@@ -14,6 +14,10 @@
             class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm hover:bg-indigo-700 transition">
             <i class="fa-solid fa-pen-to-square mr-1"></i> Edit
         </a>
+        <button onclick="generateReview({{ employee.pk }})"
+            class="flex items-center gap-2 border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-4 py-2 rounded-xl text-sm font-semibold transition">
+            <i class="fa-solid fa-robot text-xs"></i> AI Review
+        </button>
     </div>
 </div>
 
@@ -138,5 +142,100 @@
         </div>
     </div>
 </div>
+
+
+<!-- Performance Review Modal -->
+<div id="review-modal"
+    class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center"
+                    style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">
+                    <i class="fa-solid fa-star text-white text-sm"></i>
+                </div>
+                <div>
+                    <p class="font-bold text-gray-900" id="review-title">AI Performance Review</p>
+                    <p class="text-xs text-gray-400" id="review-subtitle"></p>
+                </div>
+            </div>
+            <button onclick="closeReview()" class="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-xl">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+        <div class="flex-1 overflow-y-auto p-6">
+            <div id="review-loading" class="text-center py-12">
+                <div
+                    class="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-3">
+                </div>
+                <p class="text-sm text-gray-400">AI is analyzing performance data...</p>
+            </div>
+            <div id="review-content" class="hidden">
+                <!-- Stats row -->
+                <div id="review-stats" class="grid grid-cols-3 gap-3 mb-5"></div>
+                <!-- Review text -->
+                <div class="bg-indigo-50 rounded-2xl p-5 border border-indigo-100">
+                    <pre id="review-text"
+                        class="text-sm text-gray-800 whitespace-pre-wrap font-sans leading-relaxed"></pre>
+                </div>
+            </div>
+        </div>
+        <div class="px-6 py-4 border-t border-gray-100 flex gap-3">
+            <button onclick="copyReview()"
+                class="flex-1 border border-gray-200 text-gray-600 hover:bg-gray-50 py-2.5 rounded-xl text-sm font-medium transition">
+                <i class="fa-solid fa-copy mr-1"></i> Copy Review
+            </button>
+            <button onclick="closeReview()"
+                class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-sm font-medium transition">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function generateReview(empId) {
+        document.getElementById('review-modal').classList.remove('hidden');
+        document.getElementById('review-loading').classList.remove('hidden');
+        document.getElementById('review-content').classList.add('hidden');
+
+        fetch(`/ai/performance-review/${empId}/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+        })
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('review-loading').classList.add('hidden');
+                document.getElementById('review-content').classList.remove('hidden');
+                if (data.review) {
+                    document.getElementById('review-title').textContent = `AI Review — ${data.employee}`;
+                    document.getElementById('review-subtitle').textContent = `${data.completed}/${data.total} tasks completed (${data.completion_rate}%)`;
+                    document.getElementById('review-stats').innerHTML = `
+                <div class="text-center bg-white rounded-xl p-3 border border-gray-100">
+                    <p class="text-2xl font-black text-indigo-600">${data.completion_rate}%</p>
+                    <p class="text-xs text-gray-400">Completion</p>
+                </div>
+                <div class="text-center bg-white rounded-xl p-3 border border-gray-100">
+                    <p class="text-2xl font-black text-emerald-600">${data.completed}</p>
+                    <p class="text-xs text-gray-400">Completed</p>
+                </div>
+                <div class="text-center bg-white rounded-xl p-3 border border-gray-100">
+                    <p class="text-2xl font-black text-gray-700">${data.total}</p>
+                    <p class="text-xs text-gray-400">Total Tasks</p>
+                </div>
+            `;
+                    document.getElementById('review-text').textContent = data.review;
+                } else {
+                    document.getElementById('review-text').textContent = 'Error: ' + (data.error || 'Unknown');
+                }
+            });
+    }
+    function closeReview() {
+        document.getElementById('review-modal').classList.add('hidden');
+    }
+    function copyReview() {
+        navigator.clipboard.writeText(document.getElementById('review-text').textContent).then(() => alert('Copied!'));
+    }
+</script>
 
 {% endblock %}

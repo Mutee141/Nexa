@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+{% block title %}Notification Preferences — NexaOps{% endblock %}
+{% block page_title %}Notification Preferences{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="flex items-center gap-3 mb-6">
+        <a href="{% url 'notification_list' %}"
+            class="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-lg">
+            <i class="fa-solid fa-arrow-left"></i>
+        </a>
+        <div>
+            <h2 class="text-xl font-bold text-gray-900">Notification Preferences</h2>
+            <p class="text-gray-500 text-sm">Control what alerts you receive</p>
+        </div>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <!-- In-app notifications -->
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-5">
+            <div class="flex items-center gap-3 mb-5">
+                <div class="w-9 h-9 bg-indigo-50 rounded-xl flex items-center justify-center">
+                    <i class="fa-solid fa-bell text-indigo-600"></i>
+                </div>
+                <div>
+                    <p class="font-semibold text-gray-800">In-App Notifications</p>
+                    <p class="text-xs text-gray-400">Shown in the notification bell</p>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <!-- Static toggle rows since template filters are limited -->
+                <label
+                    class="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 cursor-pointer transition">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 bg-indigo-50 rounded-lg flex items-center justify-center">
+                            <i class="fa-solid fa-list-check text-indigo-500 text-sm"></i>
+                        </div>
+                        <span class="text-sm font-medium text-gray-700">Task Assigned to me</span>
+                    </div>
+                    <input type="checkbox" name="task_assigned" {% if prefs.task_assigned %}checked{% endif %}
+                        class="w-4 h-4 rounded text-indigo-600">
+                </label>
+                <label
+                    class="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 cursor-pointer transition">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 bg-red-50 rounded-lg flex items-center justify-center">
+                            <i class="fa-solid fa-clock text-red-500 text-sm"></i>
+                        </div>
+                        <span class="text-sm font-medium text-gray-700">Task Due Soon</span>
+                    </div>
+                    <input type="checkbox" name="task_due" {% if prefs.task_due %}checked{% endif %}
+                        class="w-4 h-4 rounded text-indigo-600">
+                </label>
+                <label
+                    class="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 cursor-pointer transition">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 bg-green-50 rounded-lg flex items-center justify-center">
+                            <i class="fa-solid fa-circle-check text-green-500 text-sm"></i>
+                        </div>
+                        <span class="text-sm font-medium text-gray-700">Task Completed</span>
+                    </div>
+                    <input type="checkbox" name="task_completed" {% if prefs.task_completed %}checked{% endif %}
+                        class="w-4 h-4 rounded text-indigo-600">
+                </label>
+                <label
+                    class="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 cursor-pointer transition">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 bg-violet-50 rounded-lg flex items-center justify-center">
+                            <i class="fa-solid fa-diagram-project text-violet-500 text-sm"></i>
+                        </div>
+                        <span class="text-sm font-medium text-gray-700">Project Updates</span>
+                    </div>
+                    <input type="checkbox" name="project_update" {% if prefs.project_update %}checked{% endif %}
+                        class="w-4 h-4 rounded text-indigo-600">
+                </label>
+                <label
+                    class="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 cursor-pointer transition">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 bg-amber-50 rounded-lg flex items-center justify-center">
+                            <i class="fa-solid fa-video text-amber-500 text-sm"></i>
+                        </div>
+                        <span class="text-sm font-medium text-gray-700">Meeting Reminders</span>
+                    </div>
+                    <input type="checkbox" name="meeting_reminder" {% if prefs.meeting_reminder %}checked{% endif %}
+                        class="w-4 h-4 rounded text-indigo-600">
+                </label>
+                <label
+                    class="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 cursor-pointer transition">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
+                            <i class="fa-solid fa-calendar-plus text-blue-500 text-sm"></i>
+                        </div>
+                        <span class="text-sm font-medium text-gray-700">New Meeting Scheduled</span>
+                    </div>
+                    <input type="checkbox" name="meeting_created" {% if prefs.meeting_created %}checked{% endif %}
+                        class="w-4 h-4 rounded text-indigo-600">
+                </label>
+                <label
+                    class="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 cursor-pointer transition">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 bg-teal-50 rounded-lg flex items-center justify-center">
+                            <i class="fa-solid fa-file-arrow-up text-teal-500 text-sm"></i>
+                        </div>
+                        <span class="text-sm font-medium text-gray-700">Document Uploads</span>
+                    </div>
+                    <input type="checkbox" name="document_upload" {% if prefs.document_upload %}checked{% endif %}
+                        class="w-4 h-4 rounded text-indigo-600">
+                </label>
+            </div>
+        </div>
+
+        <!-- Email notifications -->
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-5">
+            <div class="flex items-center gap-3 mb-5">
+                <div class="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center">
+                    <i class="fa-solid fa-envelope text-blue-600"></i>
+                </div>
+                <div>
+                    <p class="font-semibold text-gray-800">Email Notifications</p>
+                    <p class="text-xs text-gray-400">Sent to {{ request.user.email }}</p>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <label
+                    class="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 cursor-pointer transition">
+                    <div>
+                        <p class="text-sm font-medium text-gray-700">Task assigned to me</p>
+                        <p class="text-xs text-gray-400">Get an email when someone assigns you a task</p>
+                    </div>
+                    <input type="checkbox" name="email_task_assigned" {% if prefs.email_task_assigned %}checked{% endif %}
+                        class="w-4 h-4 rounded text-indigo-600">
+                </label>
+                <label
+                    class="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 cursor-pointer transition">
+                    <div>
+                        <p class="text-sm font-medium text-gray-700">Task due soon</p>
+                        <p class="text-xs text-gray-400">Reminder when your task deadline is approaching</p>
+                    </div>
+                    <input type="checkbox" name="email_task_due" {% if prefs.email_task_due %}checked{% endif %}
+                        class="w-4 h-4 rounded text-indigo-600">
+                </label>
+                <label
+                    class="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 cursor-pointer transition">
+                    <div>
+                        <p class="text-sm font-medium text-gray-700">Meeting reminder</p>
+                        <p class="text-xs text-gray-400">Email before your scheduled meetings</p>
+                    </div>
+                    <input type="checkbox" name="email_meeting_reminder" {% if prefs.email_meeting_reminder %}checked{% endif %}
+                        class="w-4 h-4 rounded text-indigo-600">
+                </label>
+                <label
+                    class="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 cursor-pointer transition">
+                    <div>
+                        <p class="text-sm font-medium text-gray-700">New meeting created</p>
+                        <p class="text-xs text-gray-400">When someone schedules a meeting with you</p>
+                    </div>
+                    <input type="checkbox" name="email_meeting_created" {% if prefs.email_meeting_created %}checked{% endif %}
+                        class="w-4 h-4 rounded text-indigo-600">
+                </label>
+            </div>
+        </div>
+
+        <button type="submit"
+            class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl text-sm font-semibold transition">
+            <i class="fa-solid fa-floppy-disk mr-2"></i> Save Preferences
+        </button>
+    </form>
+</div>
+{% endblock %}

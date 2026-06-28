@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% block title %}Team Invites — NexaOps{% endblock %}
+{% block page_title %}Team Invites{% endblock %}
+
+{% block content %}
+
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h2 class="text-2xl font-extrabold text-gray-900">Team Invites</h2>
+        <p class="text-gray-400 text-sm mt-1">Invite teammates to join your workspace</p>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- Send invite form -->
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+        <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-user-plus text-indigo-500"></i> Send Invite
+        </h3>
+        <form method="post" action="{% url 'send_invite' %}">
+            {% csrf_token %}
+            <div class="mb-4">
+                <label class="block text-xs font-medium text-gray-600 mb-1.5">Email Address <span
+                        class="text-red-500">*</span></label>
+                <input type="email" name="email" required placeholder="colleague@company.com"
+                    class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+            <div class="mb-5">
+                <label class="block text-xs font-medium text-gray-600 mb-1.5">Role</label>
+                <select name="role"
+                    class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                    <option value="employee">Employee</option>
+                    <option value="manager">Manager</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+            <button type="submit"
+                class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-sm font-bold transition">
+                <i class="fa-solid fa-paper-plane mr-1"></i> Send Invite
+            </button>
+        </form>
+        <div class="mt-4 p-3 bg-amber-50 rounded-xl border border-amber-100">
+            <p class="text-xs text-amber-700 leading-relaxed">
+                <i class="fa-solid fa-circle-info mr-1"></i>
+                Invite links expire after 7 days. The invited user will receive an email with a signup link.
+            </p>
+        </div>
+    </div>
+
+    <!-- Pending invites -->
+    <div class="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm">
+        <div class="px-5 py-4 border-b border-gray-100">
+            <h3 class="font-bold text-gray-800">Sent Invites</h3>
+        </div>
+        <div class="divide-y divide-gray-50">
+            {% for invite in invites %}
+            <div class="flex items-center gap-4 px-5 py-3 hover:bg-gray-50 transition">
+                <div class="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <i class="fa-solid fa-envelope text-indigo-500 text-sm"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-semibold text-gray-800">{{ invite.email }}</p>
+                    <p class="text-xs text-gray-400">
+                        {{ invite.get_role_display }} ·
+                        Sent {{ invite.created_at|timesince }} ago
+                        {% if invite.is_expired %} · <span class="text-red-400">Expired</span>{% endif %}
+                    </p>
+                </div>
+                <div class="flex items-center gap-2 flex-shrink-0">
+                    {% if invite.is_used %}
+                    <span
+                        class="text-xs bg-green-100 text-green-700 px-2.5 py-1 rounded-full font-semibold">Accepted</span>
+                    {% elif invite.is_expired %}
+                    <span class="text-xs bg-red-100 text-red-600 px-2.5 py-1 rounded-full font-semibold">Expired</span>
+                    {% else %}
+                    <span
+                        class="text-xs bg-amber-100 text-amber-700 px-2.5 py-1 rounded-full font-semibold">Pending</span>
+                    {% endif %}
+                    {% if not invite.is_used %}
+                    <form method="post" action="{% url 'revoke_invite' invite.pk %}"
+                        onsubmit="return confirm('Revoke this invite?')">
+                        {% csrf_token %}
+                        <button type="submit"
+                            class="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition">
+                            <i class="fa-solid fa-trash text-xs"></i>
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <div class="py-14 text-center">
+                <i class="fa-solid fa-user-plus text-4xl text-gray-200 mb-3 block"></i>
+                <p class="text-gray-400 font-medium">No invites sent yet</p>
+                <p class="text-gray-300 text-xs mt-1">Use the form to invite your first team member</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

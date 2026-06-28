@@ -1,0 +1,1390 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexaOps — AI-Powered Business Operations Platform</title>
+    <meta name="description"
+        content="Manage tasks, projects, employees, meetings and documents with the power of AI. Built for modern teams.">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { primary: { 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca' } }
+                }
+            }
+        }
+    </script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            background: #050508;
+        }
+
+        /* ═══ Animated gradient background ═══ */
+        .aurora-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background: radial-gradient(ellipse 80% 50% at 20% -10%, rgba(99, 102, 241, 0.25), transparent),
+                radial-gradient(ellipse 60% 50% at 90% 10%, rgba(168, 85, 247, 0.2), transparent),
+                radial-gradient(ellipse 60% 50% at 50% 100%, rgba(34, 211, 238, 0.12), transparent),
+                #050508;
+            animation: auroraShift 18s ease-in-out infinite;
+        }
+
+        @keyframes auroraShift {
+
+            0%,
+            100% {
+                filter: hue-rotate(0deg) brightness(1);
+            }
+
+            50% {
+                filter: hue-rotate(20deg) brightness(1.08);
+            }
+        }
+
+        /* ═══ Floating orbs ═══ */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .orb1 {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, #6366f1, transparent 70%);
+            top: -150px;
+            left: -100px;
+            animation: floatOrb1 14s ease-in-out infinite;
+        }
+
+        .orb2 {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, #a855f7, transparent 70%);
+            top: 200px;
+            right: -150px;
+            animation: floatOrb2 16s ease-in-out infinite;
+        }
+
+        .orb3 {
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, #22d3ee, transparent 70%);
+            bottom: -100px;
+            left: 30%;
+            animation: floatOrb3 20s ease-in-out infinite;
+        }
+
+        @keyframes floatOrb1 {
+
+            0%,
+            100% {
+                transform: translate(0, 0)
+            }
+
+            50% {
+                transform: translate(60px, 40px)
+            }
+        }
+
+        @keyframes floatOrb2 {
+
+            0%,
+            100% {
+                transform: translate(0, 0)
+            }
+
+            50% {
+                transform: translate(-50px, 60px)
+            }
+        }
+
+        @keyframes floatOrb3 {
+
+            0%,
+            100% {
+                transform: translate(0, 0)
+            }
+
+            50% {
+                transform: translate(40px, -50px)
+            }
+        }
+
+        /* ═══ Grid pattern overlay ═══ */
+        .grid-overlay {
+            position: absolute;
+            inset: 0;
+            background-image: linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+            background-size: 60px 60px;
+            mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 80%);
+        }
+
+        /* ═══ Glass nav — now truly full-width with wider inner content ═══ */
+        .nav-glass {
+            background: rgba(5, 5, 8, 0.75);
+            backdrop-filter: blur(24px) saturate(160%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+        }
+
+        .nav-inner {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            height: 68px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 2rem;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .nav-link {
+            padding: 0.5rem 0.85rem;
+            font-size: 0.875rem;
+            color: rgba(255, 255, 255, 0.55);
+            font-weight: 500;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            letter-spacing: -0.01em;
+        }
+
+        .nav-link:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        /* ═══ Gradient text ═══ */
+        .gradient-text {
+            background: linear-gradient(135deg, #818cf8 0%, #c084fc 50%, #22d3ee 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            background-size: 200% auto;
+            animation: gradientFlow 6s ease infinite;
+        }
+
+        @keyframes gradientFlow {
+
+            0%,
+            100% {
+                background-position: 0% center
+            }
+
+            50% {
+                background-position: 100% center
+            }
+        }
+
+        /* ═══ Glow button ═══ */
+        .btn-glow {
+            position: relative;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.6), 0 10px 40px -10px rgba(99, 102, 241, 0.7);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-glow:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 0 0 8px rgba(99, 102, 241, 0.1), 0 20px 50px -10px rgba(99, 102, 241, 0.9);
+        }
+
+        .btn-glow::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border-radius: inherit;
+            background: linear-gradient(135deg, #818cf8, #c084fc, #22d3ee);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
+            filter: blur(8px);
+        }
+
+        .btn-glow:hover::before {
+            opacity: 0.6;
+        }
+
+        /* ═══ Glass card ═══ */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(99, 102, 241, 0.4);
+            transform: translateY(-8px);
+            box-shadow: 0 30px 60px -20px rgba(99, 102, 241, 0.3);
+        }
+
+        /* ═══ Shimmer badge ═══ */
+        .shimmer-badge {
+            position: relative;
+            overflow: hidden;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.25);
+        }
+
+        .shimmer-badge::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 60%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+            animation: shimmerSlide 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmerSlide {
+            0% {
+                left: -100%
+            }
+
+            50%,
+            100% {
+                left: 150%
+            }
+        }
+
+        /* ═══ Floating animation ═══ */
+        .float-slow {
+            animation: floatY 6s ease-in-out infinite;
+        }
+
+        @keyframes floatY {
+
+            0%,
+            100% {
+                transform: translateY(0)
+            }
+
+            50% {
+                transform: translateY(-16px)
+            }
+        }
+
+        /* ═══ Mockup glow border ═══ */
+        .mockup-glow {
+            position: relative;
+        }
+
+        .mockup-glow::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 28px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.5), rgba(168, 85, 247, 0.3), rgba(34, 211, 238, 0.4));
+            z-index: -1;
+            filter: blur(20px);
+            opacity: 0.6;
+            animation: glowPulse 4s ease-in-out infinite;
+        }
+
+        @keyframes glowPulse {
+
+            0%,
+            100% {
+                opacity: 0.4
+            }
+
+            50% {
+                opacity: 0.7
+            }
+        }
+
+        /* ═══ Counter numbers ═══ */
+        .counter-num {
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* ═══ Feature card icon glow ═══ */
+        .icon-glow {
+            box-shadow: 0 0 30px -8px currentColor;
+        }
+
+        /* ═══ Pulse dot ═══ */
+        .pulse-live {
+            position: relative;
+        }
+
+        .pulse-live::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            background: currentColor;
+            opacity: 0.3;
+            animation: pulseLive 2s ease-out infinite;
+        }
+
+        @keyframes pulseLive {
+            0% {
+                transform: scale(1);
+                opacity: 0.5
+            }
+
+            100% {
+                transform: scale(2.2);
+                opacity: 0
+            }
+        }
+
+        /* ═══ Testimonial card hover ═══ */
+        .testimonial-card {
+            transition: all 0.4s ease;
+        }
+
+        .testimonial-card:hover {
+            transform: translateY(-6px) rotate(-0.5deg);
+        }
+
+        /* ═══ Section divider glow ═══ */
+        .divider-glow {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.4), transparent);
+        }
+
+        /* ═══ Scroll progress bar ═══ */
+        #scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #6366f1, #a855f7, #22d3ee);
+            z-index: 100;
+            width: 0%;
+            transition: width 0.1s ease;
+        }
+
+        /* ═══ Cursor glow follow ═══ */
+        #cursor-glow {
+            position: fixed;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.15), transparent 70%);
+            pointer-events: none;
+            z-index: 1;
+            transition: opacity 0.3s ease;
+            transform: translate(-50%, -50%);
+        }
+
+        /* ═══ FOOTER STYLES ═══ */
+        .footer-wrap {
+            position: relative;
+            background: linear-gradient(180deg, #050508 0%, #08080f 40%, #0a0a14 100%);
+            border-top: 1px solid rgba(99, 102, 241, 0.15);
+            overflow: hidden;
+        }
+
+        .footer-glow-left {
+            position: absolute;
+            bottom: -120px;
+            left: -80px;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.12), transparent 70%);
+            pointer-events: none;
+        }
+
+        .footer-glow-right {
+            position: absolute;
+            top: -80px;
+            right: -60px;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(168, 85, 247, 0.1), transparent 70%);
+            pointer-events: none;
+        }
+
+        .footer-brand-tagline {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.35);
+            line-height: 1.7;
+            max-width: 240px;
+        }
+
+        .footer-col-heading {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.3);
+            margin-bottom: 1.1rem;
+        }
+
+        .footer-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: rgba(255, 255, 255, 0.45);
+            transition: color 0.2s ease;
+            padding: 0.2rem 0;
+            font-weight: 450;
+        }
+
+        .footer-link:hover {
+            color: #fff;
+        }
+
+        .footer-link i {
+            width: 14px;
+            opacity: 0.5;
+            font-size: 0.75rem;
+        }
+
+        .footer-social-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.45);
+            font-size: 0.85rem;
+            transition: all 0.25s ease;
+        }
+
+        .footer-social-btn:hover {
+            background: rgba(99, 102, 241, 0.18);
+            border-color: rgba(99, 102, 241, 0.4);
+            color: #818cf8;
+            transform: translateY(-2px);
+        }
+
+        .footer-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            font-size: 0.72rem;
+            color: rgba(255, 255, 255, 0.35);
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 100px;
+            padding: 0.35rem 0.8rem;
+            font-weight: 500;
+        }
+
+        .footer-bottom-bar {
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 1.25rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .footer-status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #10b981;
+            box-shadow: 0 0 8px rgba(16, 185, 129, 0.7);
+            animation: statusPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes statusPulse {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: 0.6
+            }
+        }
+
+        /* ═══ Mobile nav toggle ═══ */
+        .mobile-menu {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            #cursor-glow {
+                display: none;
+            }
+
+            .orb {
+                filter: blur(50px);
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .mobile-menu {
+                display: block;
+            }
+
+            .footer-bottom-bar {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body class="text-white">
+
+    <!-- Scroll progress -->
+    <div id="scroll-progress"></div>
+
+    <!-- Cursor glow -->
+    <div id="cursor-glow"></div>
+
+    <!-- Animated background layers -->
+    <div class="aurora-bg"></div>
+    <div class="grid-overlay" style="position:fixed;inset:0;z-index:0"></div>
+    <div class="orb orb1" style="position:fixed;z-index:0"></div>
+    <div class="orb orb2" style="position:fixed;z-index:0"></div>
+    <div class="orb orb3" style="position:fixed;z-index:0"></div>
+
+    <div style="position:relative;z-index:10">
+
+        <!-- ═══ NAVBAR — full-width, wider inner layout ═══ -->
+        <nav class="nav-glass fixed top-0 left-0 right-0 z-50 w-full">
+            <div class="nav-inner">
+                <!-- Logo -->
+                <a href="/" class="flex items-center gap-2.5 flex-shrink-0">
+                    <div class="w-9 h-9 rounded-xl flex items-center justify-center"
+                        style="background:linear-gradient(135deg,#6366f1,#a855f7);box-shadow:0 0 20px rgba(99,102,241,0.5)">
+                        <i class="fa-solid fa-brain text-white text-sm"></i>
+                    </div>
+                    <span class="font-bold text-white text-lg tracking-tight">NexaOps</span>
+                </a>
+
+                <!-- Center nav links -->
+                <div class="nav-links">
+                    <a href="#features" class="nav-link">Features</a>
+                    <a href="#how-it-works" class="nav-link">How it works</a>
+                    <a href="#testimonials" class="nav-link">Reviews</a>
+                    <a href="{% url 'landing_about' %}" class="nav-link">About</a>
+                    <a href="{% url 'pricing_page' %}" class="nav-link">Pricing</a>
+                    <a href="{% url 'landing_contact' %}" class="nav-link">Contact</a>
+                </div>
+
+                <!-- Right actions -->
+                <div class="nav-actions">
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'dashboard_home' %}" class="nav-link">Dashboard →</a>
+                    {% else %}
+                    <a href="{% url 'account_login' %}" class="nav-link">Sign in</a>
+                    <a href="{% url 'account_signup' %}"
+                        class="btn-glow text-white px-5 py-2 rounded-xl text-sm font-semibold">
+                        Start free →
+                    </a>
+                    {% endif %}
+                    <!-- Mobile hamburger -->
+                    <button class="mobile-menu text-gray-400 hover:text-white ml-2" onclick="toggleMobileMenu()">
+                        <i class="fa-solid fa-bars text-lg"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- Mobile dropdown -->
+            <div id="mobile-nav" style="display:none;border-top:1px solid rgba(255,255,255,0.06)"
+                class="px-6 py-4 space-y-1">
+                <a href="#features" class="nav-link block">Features</a>
+                <a href="#how-it-works" class="nav-link block">How it works</a>
+                <a href="#testimonials" class="nav-link block">Reviews</a>
+                <a href="{% url 'landing_about' %}" class="nav-link block">About</a>
+                <a href="{% url 'pricing_page' %}" class="nav-link block">Pricing</a>
+                <a href="{% url 'landing_contact' %}" class="nav-link block">Contact</a>
+                <div class="pt-3 flex gap-3">
+                    <a href="{% url 'account_login' %}" class="nav-link">Sign in</a>
+                    <a href="{% url 'account_signup' %}"
+                        class="btn-glow text-white px-5 py-2 rounded-xl text-sm font-semibold">Start free →</a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- ═══ HERO ═══ -->
+        <section class="pt-40 pb-24 px-6 relative">
+            <div class="max-w-6xl mx-auto text-center">
+
+                <div class="shimmer-badge inline-flex items-center gap-2 text-indigo-300 text-xs font-semibold px-4 py-2 rounded-full mb-8"
+                    data-aos="fade-down" data-aos-duration="600">
+                    <span class="w-2 h-2 bg-indigo-400 rounded-full pulse-live text-indigo-400"></span>
+                    Powered by Claude AI · Built for 2026
+                </div>
+
+                <h1 class="text-5xl lg:text-7xl font-black leading-tight mb-6" data-aos="fade-up"
+                    data-aos-duration="700" data-aos-delay="100">
+                    Run your entire business<br>
+                    <span class="gradient-text">with the power of AI</span>
+                </h1>
+
+                <p class="text-xl text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed" data-aos="fade-up"
+                    data-aos-duration="700" data-aos-delay="200">
+                    NexaOps combines task management, project tracking, HR, meetings, documents, and AI tools
+                    into one beautiful platform. Your team will love it.
+                </p>
+
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-14" data-aos="fade-up"
+                    data-aos-duration="700" data-aos-delay="300">
+                    <a href="{% url 'account_signup' %}"
+                        class="btn-glow text-white px-8 py-4 rounded-2xl text-base font-bold flex items-center gap-2">
+                        <i class="fa-solid fa-rocket"></i> Start for free — no credit card
+                    </a>
+                    <a href="{% url 'pricing_page' %}"
+                        class="glass-card text-white px-8 py-4 rounded-2xl text-base font-semibold flex items-center gap-2">
+                        <i class="fa-solid fa-tag text-indigo-400"></i> View pricing
+                    </a>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-center gap-6 text-sm text-gray-500 mb-16"
+                    data-aos="fade-up" data-aos-delay="400">
+                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-shield-halved text-emerald-400"></i>
+                        No credit card required</span>
+                    <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
+                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-clock text-indigo-400"></i> 2 min
+                        setup</span>
+                    <span class="w-1 h-1 bg-gray-700 rounded-full"></span>
+                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-rotate-left text-amber-400"></i>
+                        Cancel anytime</span>
+                </div>
+
+                <!-- Dashboard mockup -->
+                <div class="mockup-glow float-slow" data-aos="zoom-in" data-aos-duration="900" data-aos-delay="200">
+                    <div class="glass-card rounded-3xl p-4 max-w-4xl mx-auto" style="background:rgba(10,10,18,0.8)">
+                        <div class="flex items-center gap-2 mb-4 px-2">
+                            <div class="w-3 h-3 bg-red-400 rounded-full"></div>
+                            <div class="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                            <div class="w-3 h-3 bg-green-400 rounded-full"></div>
+                            <div
+                                class="flex-1 bg-white/5 rounded-lg px-4 py-1.5 text-xs text-gray-500 ml-3 flex items-center gap-2">
+                                <i class="fa-solid fa-lock text-xs"></i> app.nexaops.com/dashboard
+                            </div>
+                        </div>
+                        <div class="bg-black/40 rounded-2xl p-4 flex gap-4 border border-white/5"
+                            style="min-height:320px">
+                            <div class="w-44 bg-white/[0.03] rounded-xl p-3 flex-shrink-0 border border-white/5">
+                                <div class="flex items-center gap-2 mb-4 px-2">
+                                    <div class="w-7 h-7 rounded-lg flex items-center justify-center"
+                                        style="background:linear-gradient(135deg,#6366f1,#a855f7)">
+                                        <i class="fa-solid fa-brain text-white text-xs"></i>
+                                    </div>
+                                    <span class="text-white text-xs font-bold">NexaOps</span>
+                                </div>
+                                <div class="space-y-1">
+                                    <div class="flex items-center gap-2 px-2 py-1.5 rounded-lg"
+                                        style="background:rgba(99,102,241,0.2)">
+                                        <div class="w-1.5 h-1.5 bg-indigo-400 rounded-full"></div><span
+                                            class="text-xs text-white">Dashboard</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 px-2 py-1.5 rounded-lg">
+                                        <div class="w-1.5 h-1.5 bg-gray-600 rounded-full"></div><span
+                                            class="text-xs text-gray-500">Tasks</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 px-2 py-1.5 rounded-lg">
+                                        <div class="w-1.5 h-1.5 bg-gray-600 rounded-full"></div><span
+                                            class="text-xs text-gray-500">Projects</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 px-2 py-1.5 rounded-lg">
+                                        <div class="w-1.5 h-1.5 bg-gray-600 rounded-full"></div><span
+                                            class="text-xs text-gray-500">Employees</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 px-2 py-1.5 rounded-lg">
+                                        <div class="w-1.5 h-1.5 bg-gray-600 rounded-full"></div><span
+                                            class="text-xs text-gray-500">Meetings</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 px-2 py-1.5 rounded-lg">
+                                        <div class="w-1.5 h-1.5 bg-indigo-400 rounded-full"></div><span
+                                            class="text-xs text-indigo-300">AI Assistant</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex-1">
+                                <div class="grid grid-cols-4 gap-2 mb-3">
+                                    <div class="rounded-xl p-3 border border-white/5"
+                                        style="background:linear-gradient(135deg,rgba(99,102,241,0.25),rgba(99,102,241,0.05))">
+                                        <div class="w-8 h-1 bg-indigo-400/40 rounded mb-2"></div>
+                                        <div class="text-white text-lg font-bold counter-num" data-count="47">0</div>
+                                    </div>
+                                    <div class="rounded-xl p-3 border border-white/5"
+                                        style="background:linear-gradient(135deg,rgba(168,85,247,0.25),rgba(168,85,247,0.05))">
+                                        <div class="w-8 h-1 bg-purple-400/40 rounded mb-2"></div>
+                                        <div class="text-white text-lg font-bold counter-num" data-count="12">0</div>
+                                    </div>
+                                    <div class="rounded-xl p-3 border border-white/5"
+                                        style="background:linear-gradient(135deg,rgba(16,185,129,0.25),rgba(16,185,129,0.05))">
+                                        <div class="w-8 h-1 bg-emerald-400/40 rounded mb-2"></div>
+                                        <div class="text-white text-lg font-bold counter-num" data-count="22">0</div>
+                                    </div>
+                                    <div class="rounded-xl p-3 border border-white/5"
+                                        style="background:linear-gradient(135deg,rgba(245,158,11,0.25),rgba(245,158,11,0.05))">
+                                        <div class="w-8 h-1 bg-amber-400/40 rounded mb-2"></div>
+                                        <div class="text-white text-lg font-bold counter-num" data-count="8">0</div>
+                                    </div>
+                                </div>
+                                <div class="bg-white/[0.03] rounded-xl p-3 mb-2 border border-white/5">
+                                    <div class="w-24 h-1.5 bg-white/10 rounded mb-3"></div>
+                                    <div class="flex items-end gap-1.5 h-16">
+                                        <div class="flex-1 rounded-t"
+                                            style="height:40%;background:linear-gradient(180deg,#818cf8,#6366f1)"></div>
+                                        <div class="flex-1 rounded-t"
+                                            style="height:65%;background:linear-gradient(180deg,#818cf8,#6366f1)"></div>
+                                        <div class="flex-1 rounded-t"
+                                            style="height:45%;background:linear-gradient(180deg,#818cf8,#6366f1)"></div>
+                                        <div class="flex-1 rounded-t"
+                                            style="height:80%;background:linear-gradient(180deg,#818cf8,#6366f1)"></div>
+                                        <div class="flex-1 rounded-t"
+                                            style="height:55%;background:linear-gradient(180deg,#818cf8,#6366f1)"></div>
+                                        <div class="flex-1 rounded-t"
+                                            style="height:90%;background:linear-gradient(180deg,#a78bfa,#8b5cf6)"></div>
+                                        <div class="flex-1 rounded-t"
+                                            style="height:70%;background:linear-gradient(180deg,#818cf8,#6366f1)"></div>
+                                    </div>
+                                </div>
+                                <div class="rounded-xl p-3 border"
+                                    style="background:rgba(99,102,241,0.08);border-color:rgba(99,102,241,0.2)">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <div
+                                            class="w-5 h-5 bg-indigo-600 rounded-full flex items-center justify-center">
+                                            <i class="fa-solid fa-robot text-white" style="font-size:8px"></i></div>
+                                        <span class="text-indigo-300 text-xs font-medium">AI Assistant</span>
+                                        <span
+                                            class="w-1.5 h-1.5 bg-emerald-400 rounded-full ml-auto pulse-live text-emerald-400"></span>
+                                    </div>
+                                    <div class="w-full h-1.5 bg-indigo-500/20 rounded mb-1.5"></div>
+                                    <div class="w-3/4 h-1.5 bg-indigo-500/20 rounded"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══ STATS BAR ═══ -->
+        <section class="py-12 px-6 relative">
+            <div class="divider-glow mb-12"></div>
+            <div class="max-w-5xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
+                <div data-aos="fade-up" data-aos-delay="0">
+                    <p class="text-4xl font-black gradient-text counter-num" data-count="2400">0</p>
+                    <p class="text-gray-500 text-sm mt-1">Tasks automated daily</p>
+                </div>
+                <div data-aos="fade-up" data-aos-delay="100">
+                    <p class="text-4xl font-black gradient-text counter-num" data-count="98">0</p>
+                    <p class="text-gray-500 text-sm mt-1">% uptime guaranteed</p>
+                </div>
+                <div data-aos="fade-up" data-aos-delay="200">
+                    <p class="text-4xl font-black gradient-text counter-num" data-count="40">0</p>
+                    <p class="text-gray-500 text-sm mt-1">% faster than spreadsheets</p>
+                </div>
+                <div data-aos="fade-up" data-aos-delay="300">
+                    <p class="text-4xl font-black gradient-text"><span class="counter-num" data-count="2">0</span>min
+                    </p>
+                    <p class="text-gray-500 text-sm mt-1">Average setup time</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══ FEATURES ═══ -->
+        <section id="features" class="py-24 px-6 relative">
+            <div class="max-w-6xl mx-auto">
+                <div class="text-center mb-16" data-aos="fade-up">
+                    <span class="text-indigo-400 text-sm font-bold uppercase tracking-wider">Features</span>
+                    <h2 class="text-4xl lg:text-5xl font-black mt-3 mb-4">Everything your business needs</h2>
+                    <p class="text-gray-400 text-lg max-w-xl mx-auto">One platform replaces five different tools. Save
+                        money and time.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="glass-card rounded-3xl p-7" data-aos="fade-up" data-aos-delay="0">
+                        <div class="w-12 h-12 rounded-2xl flex items-center justify-center mb-5 icon-glow"
+                            style="background:rgba(99,102,241,0.15);color:#6366f1">
+                            <i class="fa-solid fa-list-check text-indigo-400 text-xl"></i>
+                        </div>
+                        <h3 class="font-bold text-white text-lg mb-2">Task Management</h3>
+                        <p class="text-gray-400 text-sm leading-relaxed">Create, assign and track tasks with priorities,
+                            due dates, and Kanban boards. Drag and drop simplicity.</p>
+                    </div>
+
+                    <div class="glass-card rounded-3xl p-7" data-aos="fade-up" data-aos-delay="50">
+                        <div class="w-12 h-12 rounded-2xl flex items-center justify-center mb-5 icon-glow"
+                            style="background:rgba(168,85,247,0.15);color:#a855f7">
+                            <i class="fa-solid fa-diagram-project text-purple-400 text-xl"></i>
+                        </div>
+                        <h3 class="font-bold text-white text-lg mb-2">Project Tracking</h3>
+                        <p class="text-gray-400 text-sm leading-relaxed">Gantt charts, milestones, team members, and
+                            progress tracking. Never miss a deadline again.</p>
+                    </div>
+
+                    <div class="rounded-3xl p-7 relative overflow-hidden" data-aos="fade-up" data-aos-delay="100"
+                        style="background:linear-gradient(135deg,rgba(99,102,241,0.15),rgba(168,85,247,0.1));border:1px solid rgba(99,102,241,0.3)">
+                        <div class="w-12 h-12 rounded-2xl flex items-center justify-center mb-5"
+                            style="background:linear-gradient(135deg,#6366f1,#a855f7);box-shadow:0 0 30px rgba(99,102,241,0.5)">
+                            <i class="fa-solid fa-robot text-white text-xl"></i>
+                        </div>
+                        <h3 class="font-bold text-white text-lg mb-2 flex items-center gap-2">AI Assistant <span
+                                class="text-xs bg-indigo-500 text-white px-2 py-0.5 rounded-full">6 TOOLS</span></h3>
+                        <p class="text-gray-300 text-sm leading-relaxed">Chat, write emails, generate tasks, summarize
+                            meetings, detect risks, build proposals. All AI-powered.</p>
+                    </div>
+
+                    <div class="glass-card rounded-3xl p-7" data-aos="fade-up" data-aos-delay="0">
+                        <div class="w-12 h-12 rounded-2xl flex items-center justify-center mb-5 icon-glow"
+                            style="background:rgba(16,185,129,0.15);color:#10b981">
+                            <i class="fa-solid fa-users text-emerald-400 text-xl"></i>
+                        </div>
+                        <h3 class="font-bold text-white text-lg mb-2">HR & Employees</h3>
+                        <p class="text-gray-400 text-sm leading-relaxed">Employee profiles, departments, role-based
+                            permissions, and time tracking in one place.</p>
+                    </div>
+
+                    <div class="glass-card rounded-3xl p-7" data-aos="fade-up" data-aos-delay="50">
+                        <div class="w-12 h-12 rounded-2xl flex items-center justify-center mb-5 icon-glow"
+                            style="background:rgba(245,158,11,0.15);color:#f59e0b">
+                            <i class="fa-solid fa-video text-amber-400 text-xl"></i>
+                        </div>
+                        <h3 class="font-bold text-white text-lg mb-2">Meeting Manager</h3>
+                        <p class="text-gray-400 text-sm leading-relaxed">Schedule meetings, calendar sync, AI-generated
+                            summaries and action items automatically.</p>
+                    </div>
+
+                    <div class="glass-card rounded-3xl p-7" data-aos="fade-up" data-aos-delay="100">
+                        <div class="w-12 h-12 rounded-2xl flex items-center justify-center mb-5 icon-glow"
+                            style="background:rgba(34,211,238,0.15);color:#22d3ee">
+                            <i class="fa-solid fa-chart-line text-cyan-400 text-xl"></i>
+                        </div>
+                        <h3 class="font-bold text-white text-lg mb-2">Analytics Dashboard</h3>
+                        <p class="text-gray-400 text-sm leading-relaxed">Real-time charts, AI monthly reports, and risk
+                            detection for total visibility.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══ HOW IT WORKS ═══ -->
+        <section id="how-it-works" class="py-24 px-6 relative">
+            <div class="divider-glow mb-24 max-w-4xl mx-auto"></div>
+            <div class="max-w-5xl mx-auto">
+                <div class="text-center mb-16" data-aos="fade-up">
+                    <span class="text-indigo-400 text-sm font-bold uppercase tracking-wider">How it works</span>
+                    <h2 class="text-4xl lg:text-5xl font-black mt-3 mb-4">Up and running in minutes</h2>
+                    <p class="text-gray-400 text-lg">No complicated setup. No training needed. Just sign up and go.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="text-center" data-aos="fade-up" data-aos-delay="0">
+                        <div class="w-16 h-16 rounded-3xl flex items-center justify-center mx-auto mb-5 text-white text-2xl font-black"
+                            style="background:linear-gradient(135deg,#6366f1,#8b5cf6);box-shadow:0 0 40px rgba(99,102,241,0.5)">
+                            1</div>
+                        <h3 class="font-bold text-white text-lg mb-2">Create your account</h3>
+                        <p class="text-gray-400 text-sm leading-relaxed">Sign up free with email or Google. No credit
+                            card needed.</p>
+                    </div>
+                    <div class="text-center" data-aos="fade-up" data-aos-delay="150">
+                        <div class="w-16 h-16 rounded-3xl flex items-center justify-center mx-auto mb-5 text-white text-2xl font-black"
+                            style="background:linear-gradient(135deg,#a855f7,#6366f1);box-shadow:0 0 40px rgba(168,85,247,0.5)">
+                            2</div>
+                        <h3 class="font-bold text-white text-lg mb-2">Add your team</h3>
+                        <p class="text-gray-400 text-sm leading-relaxed">Invite employees, set roles, assign permissions
+                            in minutes.</p>
+                    </div>
+                    <div class="text-center" data-aos="fade-up" data-aos-delay="300">
+                        <div class="w-16 h-16 rounded-3xl flex items-center justify-center mx-auto mb-5 text-white text-2xl font-black"
+                            style="background:linear-gradient(135deg,#22d3ee,#6366f1);box-shadow:0 0 40px rgba(34,211,238,0.5)">
+                            3</div>
+                        <h3 class="font-bold text-white text-lg mb-2">Start with AI</h3>
+                        <p class="text-gray-400 text-sm leading-relaxed">Ask the AI assistant to create tasks, write
+                            emails, run reports.</p>
+                    </div>
+                </div>
+
+                <div class="text-center mt-14" data-aos="zoom-in">
+                    <a href="{% url 'account_signup' %}"
+                        class="btn-glow text-white px-8 py-4 rounded-2xl text-base font-bold inline-flex items-center gap-2">
+                        <i class="fa-solid fa-rocket"></i> Get started free
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══ AI HIGHLIGHT ═══ -->
+        <section class="py-24 px-6 relative">
+            <div class="max-w-6xl mx-auto">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    <div data-aos="fade-right">
+                        <span class="text-indigo-400 text-sm font-bold uppercase tracking-wider">AI Power</span>
+                        <h2 class="text-4xl font-black mt-3 mb-6">Your business, amplified by AI</h2>
+                        <p class="text-gray-400 text-lg mb-8 leading-relaxed">
+                            NexaOps is built with Claude AI at its core. Six dedicated AI tools save your team hours
+                            every week.
+                        </p>
+                        <div class="space-y-4">
+                            <div class="flex items-start gap-4">
+                                <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
+                                    style="background:rgba(99,102,241,0.15)">
+                                    <i class="fa-solid fa-bolt text-indigo-400"></i>
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-white">AI Daily Standup</p>
+                                    <p class="text-gray-400 text-sm">Reads your tasks and writes today's update
+                                        automatically.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-4">
+                                <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
+                                    style="background:rgba(168,85,247,0.15)">
+                                    <i class="fa-solid fa-magnifying-glass text-purple-400"></i>
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-white">AI Smart Search</p>
+                                    <p class="text-gray-400 text-sm">Search in plain English across tasks, projects, and
+                                        people.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-4">
+                                <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
+                                    style="background:rgba(16,185,129,0.15)">
+                                    <i class="fa-solid fa-triangle-exclamation text-emerald-400"></i>
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-white">AI Risk Detector</p>
+                                    <p class="text-gray-400 text-sm">Scans projects and flags bottlenecks before they
+                                        become problems.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-4">
+                                <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
+                                    style="background:rgba(245,158,11,0.15)">
+                                    <i class="fa-solid fa-file-contract text-amber-400"></i>
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-white">AI Proposal Writer</p>
+                                    <p class="text-gray-400 text-sm">Generates client proposals from your project data
+                                        instantly.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mockup-glow" data-aos="fade-left">
+                        <div class="rounded-3xl p-6"
+                            style="background:rgba(10,10,18,0.9);border:1px solid rgba(255,255,255,0.08)">
+                            <div class="flex items-center gap-3 mb-5 pb-4"
+                                style="border-bottom:1px solid rgba(255,255,255,0.08)">
+                                <div class="w-9 h-9 rounded-xl flex items-center justify-center"
+                                    style="background:linear-gradient(135deg,#6366f1,#a855f7)">
+                                    <i class="fa-solid fa-robot text-white text-sm"></i>
+                                </div>
+                                <div>
+                                    <p class="text-white font-semibold text-sm">NexaOps AI</p>
+                                    <p class="text-emerald-400 text-xs flex items-center gap-1"><span
+                                            class="w-1.5 h-1.5 bg-emerald-400 rounded-full pulse-live"></span> Online
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="space-y-4 mb-5">
+                                <div class="flex justify-end">
+                                    <div class="text-white text-sm px-4 py-2.5 rounded-2xl rounded-tr-sm max-w-xs"
+                                        style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">
+                                        Write a follow-up email about project delays
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <div class="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-1"
+                                        style="background:rgba(99,102,241,0.2)">
+                                        <i class="fa-solid fa-robot text-indigo-400 text-xs"></i>
+                                    </div>
+                                    <div class="text-gray-300 text-sm px-4 py-3 rounded-2xl rounded-tl-sm max-w-xs leading-relaxed"
+                                        style="background:rgba(255,255,255,0.05)">
+                                        <strong class="text-white">Subject:</strong> Update on Project Timeline<br><br>
+                                        Dear Client, I wanted to reach out regarding our current timeline...
+                                        <span class="text-indigo-400 text-xs block mt-2">✓ Generated in 1.2
+                                            seconds</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <div class="flex-1 rounded-xl px-4 py-2.5 text-gray-500 text-sm"
+                                    style="background:rgba(255,255,255,0.05)">Ask anything...</div>
+                                <div class="w-10 h-10 rounded-xl flex items-center justify-center"
+                                    style="background:linear-gradient(135deg,#6366f1,#a855f7)">
+                                    <i class="fa-solid fa-paper-plane text-white text-sm"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══ TESTIMONIALS ═══ -->
+        <section id="testimonials" class="py-24 px-6 relative">
+            <div class="max-w-6xl mx-auto">
+                <div class="text-center mb-16" data-aos="fade-up">
+                    <span class="text-indigo-400 text-sm font-bold uppercase tracking-wider">Testimonials</span>
+                    <h2 class="text-4xl lg:text-5xl font-black mt-3 mb-4">Teams love NexaOps</h2>
+                    <div class="flex items-center justify-center gap-1 mt-4">
+                        {% for i in '12345' %}<i class="fa-solid fa-star text-amber-400"></i>{% endfor %}
+                        <span class="text-gray-400 text-sm ml-2">4.9/5 from early users</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="testimonial-card glass-card rounded-3xl p-7" data-aos="fade-up" data-aos-delay="0">
+                        <div class="flex items-center gap-1 mb-4">{% for i in '12345' %}<i
+                                class="fa-solid fa-star text-amber-400 text-sm"></i>{% endfor %}</div>
+                        <p class="text-gray-300 text-sm leading-relaxed mb-6">"The AI email writer alone saves me 2
+                            hours every day. I can't imagine going back to doing it manually."</p>
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm text-white"
+                                style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">SA</div>
+                            <div>
+                                <p class="text-sm font-semibold text-white">Sarah A.</p>
+                                <p class="text-xs text-gray-500">Operations Manager</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-card rounded-3xl p-7" data-aos="fade-up" data-aos-delay="100"
+                        style="background:linear-gradient(135deg,rgba(99,102,241,0.2),rgba(168,85,247,0.1));border:1px solid rgba(99,102,241,0.3)">
+                        <div class="flex items-center gap-1 mb-4">{% for i in '12345' %}<i
+                                class="fa-solid fa-star text-amber-300 text-sm"></i>{% endfor %}</div>
+                        <p class="text-gray-200 text-sm leading-relaxed mb-6">"We replaced 4 different tools with
+                            NexaOps. Team productivity went up 40% in the first month."</p>
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm text-white"
+                                style="background:rgba(255,255,255,0.2)">MK</div>
+                            <div>
+                                <p class="text-sm font-semibold text-white">Michael K.</p>
+                                <p class="text-xs text-indigo-300">CEO, TechStart</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-card glass-card rounded-3xl p-7" data-aos="fade-up" data-aos-delay="200">
+                        <div class="flex items-center gap-1 mb-4">{% for i in '12345' %}<i
+                                class="fa-solid fa-star text-amber-400 text-sm"></i>{% endfor %}</div>
+                        <p class="text-gray-300 text-sm leading-relaxed mb-6">"The AI meeting summary feature is pure
+                            magic. After every call I get a clean summary in seconds."</p>
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm text-white"
+                                style="background:linear-gradient(135deg,#10b981,#22d3ee)">RP</div>
+                            <div>
+                                <p class="text-sm font-semibold text-white">Rania P.</p>
+                                <p class="text-xs text-gray-500">Project Director</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══ PRICING PREVIEW ═══ -->
+        <section class="py-24 px-6 relative">
+            <div class="max-w-3xl mx-auto text-center" data-aos="fade-up">
+                <span class="text-indigo-400 text-sm font-bold uppercase tracking-wider">Pricing</span>
+                <h2 class="text-4xl lg:text-5xl font-black mt-3 mb-4">Start free, grow as you scale</h2>
+                <p class="text-gray-400 text-lg mb-10">Free forever for small teams. Upgrade when you need more power.
+                </p>
+
+                <div class="grid grid-cols-3 gap-4 mb-8">
+                    <div class="glass-card rounded-2xl p-5">
+                        <p class="text-2xl font-black text-white mb-1">Free</p>
+                        <p class="text-gray-500 text-sm">3 users · 5 projects</p>
+                    </div>
+                    <div class="rounded-2xl p-5 relative overflow-hidden"
+                        style="background:linear-gradient(135deg,#6366f1,#8b5cf6);box-shadow:0 20px 40px -10px rgba(99,102,241,0.5)">
+                        <div class="absolute top-2 right-2 text-xs bg-white/20 px-2 py-0.5 rounded-full text-white">
+                            Popular</div>
+                        <p class="text-2xl font-black text-white mb-1">$29<span
+                                class="text-indigo-200 text-sm font-normal">/mo</span></p>
+                        <p class="text-indigo-200 text-sm">25 users · Unlimited</p>
+                    </div>
+                    <div class="glass-card rounded-2xl p-5">
+                        <p class="text-2xl font-black text-white mb-1">$99<span
+                                class="text-gray-400 text-sm font-normal">/mo</span></p>
+                        <p class="text-gray-500 text-sm">Unlimited everything</p>
+                    </div>
+                </div>
+
+                <a href="{% url 'pricing_page' %}"
+                    class="inline-flex items-center gap-2 text-indigo-400 font-semibold hover:text-indigo-300 transition">
+                    See full pricing details <i class="fa-solid fa-arrow-right text-sm"></i>
+                </a>
+            </div>
+        </section>
+
+        <!-- ═══ FINAL CTA ═══ -->
+        <section class="py-24 px-6 relative">
+            <div class="max-w-3xl mx-auto text-center glass-card rounded-[40px] p-12 lg:p-16" data-aos="zoom-in"
+                style="background:linear-gradient(135deg,rgba(99,102,241,0.15),rgba(168,85,247,0.1));border-color:rgba(99,102,241,0.3)">
+                <div class="w-16 h-16 rounded-3xl flex items-center justify-center mx-auto mb-6"
+                    style="background:linear-gradient(135deg,#6366f1,#a855f7);box-shadow:0 0 50px rgba(99,102,241,0.6)">
+                    <i class="fa-solid fa-brain text-white text-2xl"></i>
+                </div>
+                <h2 class="text-4xl lg:text-5xl font-black text-white mb-4">Ready to transform your business?</h2>
+                <p class="text-gray-300 text-lg mb-10">Join teams already using NexaOps to work smarter, faster, and
+                    better with AI.</p>
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <a href="{% url 'account_signup' %}"
+                        class="btn-glow text-white px-8 py-4 rounded-2xl text-base font-bold flex items-center gap-2">
+                        <i class="fa-solid fa-rocket"></i> Start free today
+                    </a>
+                    <a href="{% url 'pricing_page' %}"
+                        class="border border-white/20 text-white hover:bg-white/10 px-8 py-4 rounded-2xl text-base font-semibold transition flex items-center gap-2">
+                        <i class="fa-solid fa-tag"></i> View pricing
+                    </a>
+                </div>
+                <p class="text-gray-500 text-sm mt-6">No credit card required · Setup in 2 minutes · Cancel anytime</p>
+            </div>
+        </section>
+
+        <!-- ═══ FOOTER — completely redesigned ═══ -->
+        <footer class="footer-wrap">
+            <!-- Ambient glows -->
+            <div class="footer-glow-left"></div>
+            <div class="footer-glow-right"></div>
+
+            <!-- Newsletter + CTA strip -->
+            <div style="border-bottom:1px solid rgba(255,255,255,0.05);padding:3rem 1.5rem">
+                <div
+                    style="max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:2rem">
+                    <div>
+                        <p style="font-size:1.125rem;font-weight:700;color:#fff;margin:0 0 0.35rem">Stay in the loop</p>
+                        <p style="font-size:0.85rem;color:rgba(255,255,255,0.4);margin:0">Product updates, tips and
+                            early access — straight to your inbox.</p>
+                    </div>
+                    <div style="display:flex;gap:0.6rem;flex-wrap:wrap">
+                        <input type="email" placeholder="you@company.com"
+                            style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#fff;font-family:Inter,sans-serif;font-size:0.875rem;border-radius:12px;padding:0.65rem 1rem;outline:none;width:220px;transition:border-color 0.2s"
+                            onfocus="this.style.borderColor='rgba(99,102,241,0.5)'"
+                            onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+                        <button class="btn-glow"
+                            style="color:#fff;font-size:0.875rem;font-weight:600;font-family:Inter,sans-serif;border:none;padding:0.65rem 1.4rem;border-radius:12px;cursor:pointer">
+                            Subscribe
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main footer grid -->
+            <div style="max-width:1100px;margin:0 auto;padding:3.5rem 1.5rem 2rem">
+                <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:2.5rem;flex-wrap:wrap">
+
+                    <!-- Brand col -->
+                    <div>
+                        <a href="/"
+                            style="display:inline-flex;align-items:center;gap:0.65rem;margin-bottom:1rem;text-decoration:none">
+                            <div
+                                style="width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,#6366f1,#a855f7);display:flex;align-items:center;justify-content:center;box-shadow:0 0 20px rgba(99,102,241,0.4)">
+                                <i class="fa-solid fa-brain" style="color:#fff;font-size:0.85rem"></i>
+                            </div>
+                            <span
+                                style="font-weight:800;font-size:1.1rem;color:#fff;letter-spacing:-0.02em">NexaOps</span>
+                        </a>
+                        <p class="footer-brand-tagline">The AI-powered operations platform built for modern businesses —
+                            from startups to enterprise.</p>
+
+                        <!-- Trust badges -->
+                        <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin:1.25rem 0">
+                            <span class="footer-badge"><i class="fa-solid fa-shield-halved"
+                                    style="color:#10b981;font-size:0.7rem"></i> SOC 2 Ready</span>
+                            <span class="footer-badge"><i class="fa-solid fa-lock"
+                                    style="color:#6366f1;font-size:0.7rem"></i> SSL Secured</span>
+                            <span class="footer-badge"><i class="fa-brands fa-stripe-s"
+                                    style="color:#635bff;font-size:0.7rem"></i> Stripe</span>
+                        </div>
+
+                        <!-- Socials -->
+                        <div style="display:flex;gap:0.5rem">
+                            <a href="#" class="footer-social-btn" title="Twitter / X"><i
+                                    class="fa-brands fa-x-twitter"></i></a>
+                            <a href="#" class="footer-social-btn" title="LinkedIn"><i
+                                    class="fa-brands fa-linkedin-in"></i></a>
+                            <a href="#" class="footer-social-btn" title="GitHub"><i class="fa-brands fa-github"></i></a>
+                            <a href="#" class="footer-social-btn" title="YouTube"><i
+                                    class="fa-brands fa-youtube"></i></a>
+                        </div>
+                    </div>
+
+                    <!-- Product col -->
+                    <div>
+                        <p class="footer-col-heading">Product</p>
+                        <div style="display:flex;flex-direction:column;gap:0.1rem">
+                            <a href="#features" class="footer-link"><i class="fa-solid fa-list-check"></i> Features</a>
+                            <a href="{% url 'pricing_page' %}" class="footer-link"><i class="fa-solid fa-tag"></i>
+                                Pricing</a>
+                            <a href="/api/docs/" class="footer-link"><i class="fa-solid fa-code"></i> API Docs</a>
+                            <a href="#" class="footer-link"><i class="fa-solid fa-newspaper"></i> Changelog</a>
+                            <a href="#" class="footer-link"><i class="fa-solid fa-circle-check"
+                                    style="color:rgba(16,185,129,0.7)"></i> Status <span
+                                    style="font-size:0.65rem;background:rgba(16,185,129,0.15);color:#10b981;border-radius:100px;padding:0.1rem 0.45rem;margin-left:2px;font-weight:600">Operational</span></a>
+                        </div>
+                    </div>
+
+                    <!-- Company col -->
+                    <div>
+                        <p class="footer-col-heading">Company</p>
+                        <div style="display:flex;flex-direction:column;gap:0.1rem">
+                            <a href="{% url 'landing_about' %}" class="footer-link"><i class="fa-solid fa-building"></i>
+                                About</a>
+                            <a href="{% url 'landing_contact' %}" class="footer-link"><i
+                                    class="fa-solid fa-envelope"></i> Contact</a>
+                            <a href="#" class="footer-link"><i class="fa-solid fa-briefcase"></i> Careers</a>
+                            <a href="#" class="footer-link"><i class="fa-solid fa-handshake"></i> Partners</a>
+                            <a href="#" class="footer-link"><i class="fa-solid fa-rss"></i> Blog</a>
+                        </div>
+                    </div>
+
+                    <!-- Resources col -->
+                    <div>
+                        <p class="footer-col-heading">Resources</p>
+                        <div style="display:flex;flex-direction:column;gap:0.1rem">
+                            <a href="#" class="footer-link"><i class="fa-solid fa-book-open"></i> Documentation</a>
+                            <a href="#" class="footer-link"><i class="fa-solid fa-life-ring"></i> Help Center</a>
+                            <a href="#" class="footer-link"><i class="fa-solid fa-users"></i> Community</a>
+                            <a href="#" class="footer-link"><i class="fa-solid fa-graduation-cap"></i> Tutorials</a>
+                            <a href="#" class="footer-link"><i class="fa-solid fa-video"></i> Webinars</a>
+                        </div>
+                    </div>
+
+                    <!-- Legal col -->
+                    <div>
+                        <p class="footer-col-heading">Legal</p>
+                        <div style="display:flex;flex-direction:column;gap:0.1rem">
+                            <a href="#" class="footer-link"><i class="fa-solid fa-user-shield"></i> Privacy Policy</a>
+                            <a href="#" class="footer-link"><i class="fa-solid fa-file-contract"></i> Terms of
+                                Service</a>
+                            <a href="#" class="footer-link"><i class="fa-solid fa-cookie-bite"></i> Cookie Policy</a>
+                            <a href="#" class="footer-link"><i class="fa-solid fa-scale-balanced"></i> GDPR</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom bar -->
+                <div class="footer-bottom-bar" style="margin-top:2.5rem">
+                    <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
+                        <span style="font-size:0.8rem;color:rgba(255,255,255,0.25)">© 2026 NexaOps, Inc. All rights
+                            reserved.</span>
+                        <div style="display:flex;align-items:center;gap:0.4rem">
+                            <div class="footer-status-dot"></div>
+                            <span style="font-size:0.75rem;color:rgba(16,185,129,0.7);font-weight:500">All systems
+                                operational</span>
+                        </div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:1.5rem">
+                        <span style="font-size:0.75rem;color:rgba(255,255,255,0.2)">Built with</span>
+                        <div style="display:flex;align-items:center;gap:0.75rem">
+                            <span
+                                style="font-size:0.72rem;color:rgba(255,255,255,0.3);font-weight:600;letter-spacing:0.04em">DJANGO</span>
+                            <span
+                                style="width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,0.15)"></span>
+                            <span
+                                style="font-size:0.72rem;color:rgba(255,255,255,0.3);font-weight:600;letter-spacing:0.04em">CLAUDE
+                                AI</span>
+                            <span
+                                style="width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,0.15)"></span>
+                            <span
+                                style="font-size:0.72rem;color:rgba(255,255,255,0.3);font-weight:600;letter-spacing:0.04em">TAILWIND</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({ duration: 700, easing: 'ease-out-cubic', once: true, offset: 60 });
+
+        // Scroll progress bar
+        window.addEventListener('scroll', () => {
+            const h = document.documentElement;
+            const scrolled = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+            document.getElementById('scroll-progress').style.width = scrolled + '%';
+        });
+
+        // Cursor glow follow (desktop only)
+        if (window.innerWidth > 768) {
+            document.addEventListener('mousemove', e => {
+                const glow = document.getElementById('cursor-glow');
+                glow.style.left = e.clientX + 'px';
+                glow.style.top = e.clientY + 'px';
+            });
+        }
+
+        // Animated counters when in view
+        function animateCounters() {
+            document.querySelectorAll('.counter-num[data-count]').forEach(el => {
+                if (el.dataset.animated) return;
+                const target = parseInt(el.dataset.count);
+                const rect = el.getBoundingClientRect();
+                if (rect.top < window.innerHeight && rect.bottom > 0) {
+                    el.dataset.animated = 'true';
+                    let start = 0;
+                    const duration = 1500;
+                    const startTime = performance.now();
+                    function step(now) {
+                        const progress = Math.min((now - startTime) / duration, 1);
+                        const ease = 1 - Math.pow(1 - progress, 3);
+                        el.textContent = Math.floor(ease * target).toLocaleString();
+                        if (progress < 1) requestAnimationFrame(step);
+                        else el.textContent = target.toLocaleString();
+                    }
+                    requestAnimationFrame(step);
+                }
+            });
+        }
+        window.addEventListener('scroll', animateCounters);
+        animateCounters();
+
+        // Mobile nav toggle
+        function toggleMobileMenu() {
+            const nav = document.getElementById('mobile-nav');
+            nav.style.display = nav.style.display === 'none' ? 'block' : 'none';
+        }
+    </script>
+
+</body>
+
+</html>

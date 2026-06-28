@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About — NexaOps</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif
+        }
+    </style>
+</head>
+
+<body class="bg-white">
+
+    <!-- Nav -->
+    <nav class="border-b border-gray-100 px-6 py-4 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-3">
+            <div class="w-9 h-9 bg-indigo-600 rounded-xl flex items-center justify-center">
+                <i class="fa-solid fa-brain text-white text-sm"></i>
+            </div>
+            <span class="font-bold text-gray-900 text-xl">NexaOps</span>
+        </a>
+        <a href="{% url 'account_signup' %}"
+            class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-indigo-700 transition">
+            Get started free
+        </a>
+    </nav>
+
+    <div class="max-w-3xl mx-auto px-6 py-20">
+        <div class="text-center mb-16">
+            <h1 class="text-5xl font-black text-gray-900 mb-4">About NexaOps</h1>
+            <p class="text-xl text-gray-500 leading-relaxed">We are building the operating system for modern businesses
+                — powered by AI.</p>
+        </div>
+
+        <div class="prose prose-lg max-w-none">
+            <div class="bg-indigo-50 rounded-3xl p-8 mb-10 text-center">
+                <p class="text-2xl font-bold text-indigo-900 leading-relaxed">
+                    "Every company deserves enterprise-grade AI tools, not just Fortune 500 companies."
+                </p>
+            </div>
+
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">Our Mission</h2>
+            <p class="text-gray-600 leading-relaxed mb-6">
+                NexaOps was built to give every business — from a 3-person startup to a 500-person enterprise — access
+                to the same AI-powered productivity tools. We believe that managing tasks, employees, meetings, and
+                documents should be simple, intelligent, and beautiful.
+            </p>
+
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">What we built</h2>
+            <div class="grid grid-cols-2 gap-4 mb-8">
+                <div class="flex items-center gap-2 text-gray-700 text-sm"><i class="fa-solid fa-check text-green-500 flex-shrink-0"></i> Task Management</div>
+                <div class="flex items-center gap-2 text-gray-700 text-sm"><i class="fa-solid fa-check text-green-500 flex-shrink-0"></i> Project Tracking</div>
+                <div class="flex items-center gap-2 text-gray-700 text-sm"><i class="fa-solid fa-check text-green-500 flex-shrink-0"></i> Employee HR</div>
+                <div class="flex items-center gap-2 text-gray-700 text-sm"><i class="fa-solid fa-check text-green-500 flex-shrink-0"></i> Meeting Manager</div>
+                <div class="flex items-center gap-2 text-gray-700 text-sm"><i class="fa-solid fa-check text-green-500 flex-shrink-0"></i> Document Hub</div>
+                <div class="flex items-center gap-2 text-gray-700 text-sm"><i class="fa-solid fa-check text-green-500 flex-shrink-0"></i> AI Assistant</div>
+                <div class="flex items-center gap-2 text-gray-700 text-sm"><i class="fa-solid fa-check text-green-500 flex-shrink-0"></i> Analytics Dashboard</div>
+                <div class="flex items-center gap-2 text-gray-700 text-sm"><i class="fa-solid fa-check text-green-500 flex-shrink-0"></i> Smart Notifications</div>
+            </div>
+
+            <div class="text-center">
+                <a href="{% url 'account_signup' %}"
+                    class="inline-flex items-center gap-2 bg-indigo-600 text-white px-8 py-4 rounded-2xl font-bold hover:bg-indigo-700 transition">
+                    <i class="fa-solid fa-rocket"></i> Try NexaOps free
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-100 py-8 text-center text-gray-400 text-sm">
+        <p>© 2026 NexaOps · <a href="/" class="hover:text-gray-600">Home</a> · <a href="{% url 'landing_contact' %}"
+                class="hover:text-gray-600">Contact</a> · <a href="{% url 'pricing_page' %}"
+                class="hover:text-gray-600">Pricing</a></p>
+    </footer>
+
+</body>
+
+</html>

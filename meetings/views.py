@@ -4,7 +4,8 @@ from django.contrib import messages
 from django.utils import timezone
 from .models import Meeting
 from accounts.models import User
-
+from notifications.utils import notify_meeting_created
+from slack_integration.utils import notify_slack_meeting
 
 @login_required
 def meeting_list(request):
@@ -52,6 +53,8 @@ def meeting_create(request):
         )
         if attendee_ids:
             meeting.attendees.set(attendee_ids)
+        notify_meeting_created(meeting)
+        notify_slack_meeting(meeting)
 
         messages.success(request, f'Meeting "{title}" scheduled!')
         return redirect('meeting_list')

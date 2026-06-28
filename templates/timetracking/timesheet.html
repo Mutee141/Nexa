@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% block title %}Timesheet — NexaOps{% endblock %}
+{% block page_title %}Time Tracking{% endblock %}
+
+{% block content %}
+
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h2 class="text-2xl font-extrabold text-gray-900">Timesheet</h2>
+        <p class="text-gray-400 text-sm mt-1">Log and track your billable hours</p>
+    </div>
+</div>
+
+<!-- Stats -->
+<div class="grid grid-cols-3 gap-4 mb-6">
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 text-center">
+        <p class="text-3xl font-black text-indigo-600">{{ total_hours|floatformat:1 }}h</p>
+        <p class="text-xs text-gray-400 mt-1">Total Hours</p>
+    </div>
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 text-center">
+        <p class="text-3xl font-black text-violet-600">{{ week_hours|floatformat:1 }}h</p>
+        <p class="text-xs text-gray-400 mt-1">This Week</p>
+    </div>
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 text-center">
+        <p class="text-3xl font-black text-emerald-600">{{ billable_hours|floatformat:1 }}h</p>
+        <p class="text-xs text-gray-400 mt-1">Billable Hours</p>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- Log time form -->
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+        <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-clock-rotate-left text-indigo-500"></i> Log Time
+        </h3>
+        <form method="post" action="{% url 'log_time' %}">
+            {% csrf_token %}
+            <div class="mb-4">
+                <label class="block text-xs font-medium text-gray-600 mb-1.5">Task</label>
+                <select name="task"
+                    class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                    <option value="">No specific task</option>
+                    {% for task in tasks %}
+                    <option value="{{ task.pk }}">{{ task.title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-4">
+                <label class="block text-xs font-medium text-gray-600 mb-1.5">Project</label>
+                <select name="project"
+                    class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                    <option value="">No project</option>
+                    {% for p in projects %}
+                    <option value="{{ p.pk }}">{{ p.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-4">
+                <label class="block text-xs font-medium text-gray-600 mb-1.5">Description</label>
+                <input type="text" name="description" placeholder="What did you work on?"
+                    class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+            <div class="grid grid-cols-2 gap-3 mb-4">
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1.5">Hours <span
+                            class="text-red-500">*</span></label>
+                    <input type="number" name="hours" step="0.25" min="0.25" max="24" placeholder="1.5"
+                        class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        required>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1.5">Date</label>
+                    <input type="date" name="date" value="{% now 'Y-m-d' %}"
+                        class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+            </div>
+            <label class="flex items-center gap-2 mb-5 cursor-pointer">
+                <input type="checkbox" name="is_billable" checked class="rounded text-indigo-600">
+                <span class="text-sm text-gray-600">Billable hours</span>
+            </label>
+            <button type="submit"
+                class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-sm font-bold transition">
+                <i class="fa-solid fa-plus mr-1"></i> Log Time
+            </button>
+        </form>
+    </div>
+
+    <!-- Time entries list -->
+    <div class="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+            <h3 class="font-bold text-gray-800">Recent Entries</h3>
+            <span class="text-xs text-gray-400">Last 50 entries</span>
+        </div>
+        <div class="divide-y divide-gray-50">
+            {% for entry in entries %}
+            <div class="flex items-center gap-4 px-5 py-3 hover:bg-gray-50 transition">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0
+                    {% if entry.is_billable %}bg-emerald-50{% else %}bg-gray-100{% endif %}">
+                    <i class="fa-solid fa-clock text-sm
+                        {% if entry.is_billable %}text-emerald-600{% else %}text-gray-400{% endif %}"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-semibold text-gray-800 truncate">
+                        {{ entry.description|default:entry.task.title|default:"No description" }}
+                    </p>
+                    <p class="text-xs text-gray-400">
+                        {{ entry.date|date:"M d, Y" }}
+                        {% if entry.project %} · {{ entry.project.name }}{% endif %}
+                        {% if entry.task %} · {{ entry.task.title }}{% endif %}
+                    </p>
+                </div>
+                <div class="flex items-center gap-3 flex-shrink-0">
+                    <div class="text-right">
+                        <p
+                            class="text-sm font-bold {% if entry.is_billable %}text-emerald-600{% else %}text-gray-500{% endif %}">
+                            {{ entry.hours }}h
+                        </p>
+                        <p class="text-xs {% if entry.is_billable %}text-emerald-400{% else %}text-gray-400{% endif %}">
+                            {% if entry.is_billable %}Billable{% else %}Non-billable{% endif %}
+                        </p>
+                    </div>
+                    <form method="post" action="{% url 'delete_time_entry' entry.pk %}"
+                        onsubmit="return confirm('Delete this entry?')">
+                        {% csrf_token %}
+                        <button type="submit"
+                            class="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition">
+                            <i class="fa-solid fa-trash text-xs"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% empty %}
+            <div class="py-16 text-center">
+                <i class="fa-solid fa-clock text-4xl text-gray-200 mb-3 block"></i>
+                <p class="text-gray-400 font-medium">No time entries yet</p>
+                <p class="text-gray-300 text-xs mt-1">Use the form to log your first hours</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

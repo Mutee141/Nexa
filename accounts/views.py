@@ -60,3 +60,21 @@ def change_password(request):
         return redirect('profile')
 
     return render(request, 'accounts/change_password.html')
+
+
+
+@login_required
+def api_settings(request):
+    from rest_framework.authtoken.models import Token
+    token, _ = Token.objects.get_or_create(user=request.user)
+    return render(request, 'accounts/api_settings.html', {'token': token})
+
+
+@login_required
+def regenerate_token(request):
+    from rest_framework.authtoken.models import Token
+    if request.method == 'POST':
+        Token.objects.filter(user=request.user).delete()
+        Token.objects.create(user=request.user)
+        messages.success(request, 'API token regenerated!')
+    return redirect('api_settings')

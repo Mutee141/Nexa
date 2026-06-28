@@ -6,248 +6,649 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}NexaOps{% endblock %}</title>
 
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        primary: {
+                        nx: {
                             50: '#eef2ff', 100: '#e0e7ff',
-                            500: '#6366f1', 600: '#4f46e5',
-                            700: '#4338ca', 800: '#3730a3', 900: '#312e81',
+                            400: '#818cf8', 500: '#6366f1',
+                            600: '#4f46e5', 700: '#4338ca',
+                            800: '#3730a3', 900: '#312e81',
                         }
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease forwards',
+                        'slide-up': 'slideUp 0.4s ease forwards',
+                        'count-up': 'countUp 0.6s ease forwards',
+                        'pulse-dot': 'pulseDot 2s infinite',
+                        'shimmer': 'shimmer 2s infinite',
+                        'glow': 'glow 3s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        fadeIn: { from: { opacity: 0 }, to: { opacity: 1 } },
+                        slideUp: { from: { opacity: 0, transform: 'translateY(16px)' }, to: { opacity: 1, transform: 'translateY(0)' } },
+                        pulseDot: { '0%,100%': { opacity: 1 }, '50%': { opacity: 0.4 } },
+                        shimmer: { '0%': { backgroundPosition: '-200% 0' }, '100%': { backgroundPosition: '200% 0' } },
+                        glow: { '0%,100%': { boxShadow: '0 0 20px rgba(99,102,241,0.3)' }, '50%': { boxShadow: '0 0 40px rgba(99,102,241,0.6)' } },
                     }
                 }
             }
         }
     </script>
+    <script>
+            (function () {
+                const saved = localStorage.getItem('nexaops-theme');
+                const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                const theme = saved || (systemDark ? 'dark' : 'light');
+                document.documentElement.setAttribute('data-theme', theme);
+                document.documentElement.style.colorScheme = theme;
+            })();
+    </script>
 
-    <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
 
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        :root {
+            --bg-main: #f4f5fb;
+            --bg-sidebar-from: #13131f;
+            --bg-sidebar-to: #0d0d18;
+            --bg-card: #ffffff;
+            --bg-card-secondary: #f8fafc;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --border-color: rgba(0, 0, 0, 0.06);
+            --border-light: #f1f5f9;
+        }
 
-        /* Sidebar transitions */
+        [data-theme="dark"] {
+            --bg-main: #0a0a12;
+            --bg-sidebar-from: #0a0a12;
+            --bg-sidebar-to: #050508;
+            --bg-card: #14141f;
+            --bg-card-secondary: #1a1a28;
+            --text-primary: #e5e7eb;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-light: rgba(255, 255, 255, 0.05);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-main);
+            transition: background 0.3s ease;
+        }
+
+        #main-area {
+            background: var(--bg-main);
+        }
+
+        #topbar {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+
+        [data-theme="dark"] #topbar {
+            background: rgba(20, 20, 31, 0.92);
+            backdrop-filter: blur(20px);
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        p,
+        span,
+        td,
+        th,
+        label {
+            transition: color 0.3s ease;
+        }
+
+        .glass-card,
+        .content-card {
+            background: var(--bg-card);
+            border-color: var(--border-color);
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+
+        [data-theme="dark"] .text-gray-900 {
+            color: var(--text-primary) !important;
+        }
+
+        [data-theme="dark"] .text-gray-800 {
+            color: var(--text-primary) !important;
+        }
+
+        [data-theme="dark"] .text-gray-700 {
+            color: var(--text-secondary) !important;
+        }
+
+        [data-theme="dark"] .text-gray-600 {
+            color: var(--text-secondary) !important;
+        }
+
+        [data-theme="dark"] .text-gray-500 {
+            color: var(--text-muted) !important;
+        }
+
+        [data-theme="dark"] .text-gray-400 {
+            color: var(--text-muted) !important;
+        }
+
+        [data-theme="dark"] .bg-white {
+            background: var(--bg-card) !important;
+        }
+
+        [data-theme="dark"] .bg-gray-50 {
+            background: var(--bg-card-secondary) !important;
+        }
+
+        [data-theme="dark"] .bg-gray-100 {
+            background: var(--bg-card-secondary) !important;
+        }
+
+        [data-theme="dark"] .border-gray-100 {
+            border-color: var(--border-color) !important;
+        }
+
+        [data-theme="dark"] .border-gray-200 {
+            border-color: var(--border-color) !important;
+        }
+
+        [data-theme="dark"] .border-gray-50 {
+            border-color: var(--border-light) !important;
+        }
+
+        [data-theme="dark"] .hover\:bg-gray-50:hover {
+            background: var(--bg-card-secondary) !important;
+        }
+
+        [data-theme="dark"] .hover\:bg-gray-100:hover {
+            background: var(--bg-card-secondary) !important;
+        }
+
+        [data-theme="dark"] input,
+        [data-theme="dark"] select,
+        [data-theme="dark"] textarea {
+            background: var(--bg-card-secondary) !important;
+            color: var(--text-primary) !important;
+            border-color: var(--border-color) !important;
+        }
+
+        [data-theme="dark"] table {
+            color: var(--text-secondary);
+        }
+
+        /* ─── SIDEBAR: always dark, immune to light/dark theme overrides ─── */
         #sidebar {
+            background: linear-gradient(180deg, #13131f 0%, #0d0d18 100%);
+            /* lock all text/icon colours inside sidebar regardless of theme */
+            color-scheme: dark;
+        }
+
+        /* Section labels */
+        #sidebar .nav-section-label {
+            color: rgba(148, 163, 184, 0.5) !important;
+        }
+
+        /* Nav item base */
+        #sidebar .nav-item {
+            border-radius: 10px;
+            transition: background 0.2s ease;
+            text-decoration: none;
+        }
+
+        #sidebar .nav-item span {
+            color: #cbd5e1 !important;
+            /* slate-300 equivalent, always */
+        }
+
+        #sidebar .nav-item .nav-icon {
+            color: #94a3b8 !important;
+            /* slate-400, always */
+        }
+
+        #sidebar .nav-item:hover {
+            background: rgba(255, 255, 255, 0.06) !important;
+        }
+
+        #sidebar .nav-item:hover span {
+            color: #ffffff !important;
+        }
+
+        #sidebar .nav-item:hover .nav-icon {
+            color: #818cf8 !important;
+        }
+
+        #sidebar .nav-item.active {
+            background: rgba(99, 102, 241, 0.18) !important;
+        }
+
+        #sidebar .nav-item.active span {
+            color: #ffffff !important;
+            font-weight: 600;
+        }
+
+        #sidebar .nav-item.active .nav-icon {
+            color: #818cf8 !important;
+        }
+
+        /* AI tool icons inside sidebar always indigo */
+        #sidebar .nav-item .nav-icon.text-indigo-400 {
+            color: #818cf8 !important;
+        }
+
+        /* User card at bottom of sidebar */
+        #sidebar .sidebar-user-card {
+            background: rgba(99, 102, 241, 0.08) !important;
+            border: 1px solid rgba(99, 102, 241, 0.15) !important;
+        }
+
+        #sidebar .sidebar-user-name {
+            color: #ffffff !important;
+        }
+
+        #sidebar .sidebar-user-email {
+            color: rgba(148, 163, 184, 0.6) !important;
+        }
+
+        #sidebar .sidebar-logout {
+            color: #64748b !important;
+            transition: color 0.2s ease, background 0.2s ease;
+        }
+
+        #sidebar .sidebar-logout:hover {
+            color: #f87171 !important;
+            background: rgba(248, 113, 113, 0.1) !important;
+        }
+
+        /* Divider inside sidebar */
+        #sidebar .sidebar-divider {
+            background: rgba(99, 102, 241, 0.15) !important;
+        }
+
+        /* Dark mode toggle switch */
+        .theme-toggle {
+            width: 44px;
+            height: 24px;
+            border-radius: 12px;
+            background: #e2e8f0;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            flex-shrink: 0;
+            border: none;
+            outline: none;
+        }
+
+        [data-theme="dark"] .theme-toggle {
+            background: #4338ca;
+        }
+
+        .theme-toggle-dot {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #fff;
+            position: absolute;
+            top: 3px;
+            left: 3px;
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        #sidebar-overlay {
-            transition: opacity 0.3s ease;
-        }
-
-        .sidebar-link { transition: all 0.2s ease; }
-        .sidebar-link:hover { transform: translateX(4px); }
-        .sidebar-link.active {
-            background: rgba(99, 102, 241, 0.15);
-            border-left: 3px solid #6366f1;
-            color: white;
-        }
-        .card-hover { transition: all 0.2s ease; }
-        .card-hover:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
         }
 
-        /* Hide scrollbar on sidebar */
-        #sidebar::-webkit-scrollbar { width: 4px; }
-        #sidebar::-webkit-scrollbar-track { background: transparent; }
-        #sidebar::-webkit-scrollbar-thumb { background: #374151; border-radius: 2px; }
-
-        /* Mobile: sidebar hidden by default */
-        @media (max-width: 1023px) {
-            #sidebar {
-                position: fixed;
-                top: 0;
-                left: 0;
-                height: 100%;
-                z-index: 50;
-                transform: translateX(-100%);
-            }
-            #sidebar.open {
-                transform: translateX(0);
-            }
-            #sidebar-overlay {
-                display: block;
-            }
-        }
-        @media (min-width: 1024px) {
-            #sidebar-overlay { display: none !important; }
-            #hamburger-btn { display: none !important; }
+        [data-theme="dark"] .theme-toggle-dot {
+            transform: translateX(20px);
         }
     </style>
 
     {% block extra_head %}{% endblock %}
 </head>
 
-<body class="bg-gray-50 text-gray-800">
+<body>
+    <script>
+        (function () {
+            const saved = localStorage.getItem('nexaops-theme');
+            const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const theme = saved || (systemDark ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
 
-    <!-- Mobile overlay backdrop -->
-    <div id="sidebar-overlay" class="hidden fixed inset-0 bg-black/50 z-40 opacity-0"
-         onclick="closeSidebar()"></div>
+    <div id="sidebar-overlay" class="hidden fixed inset-0 bg-black/60 z-40 opacity-0 backdrop-blur-sm"
+        onclick="closeSidebar()"></div>
 
     <div class="flex h-screen overflow-hidden">
 
-        <!-- ===== SIDEBAR ===== -->
-        <aside id="sidebar" class="w-64 bg-gray-900 text-white flex flex-col flex-shrink-0 h-full overflow-y-auto">
+        <!-- ═══════════════════════════════════════════
+     SIDEBAR
+═══════════════════════════════════════════ -->
+        <aside id="sidebar" class="w-[240px] flex flex-col flex-shrink-0 h-full overflow-y-auto z-50">
 
-            <!-- Logo + Close button -->
-            <div class="flex items-center justify-between px-5 py-4 border-b border-gray-700">
+            <!-- Logo -->
+            <div class="px-5 py-5 flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 bg-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <div class="w-9 h-9 rounded-xl flex items-center justify-center ai-glow flex-shrink-0"
+                        style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">
                         <i class="fa-solid fa-brain text-white text-sm"></i>
                     </div>
                     <div>
-                        <p class="font-bold text-white text-sm leading-none">NexaOps</p>
-                        <p class="text-gray-400 text-xs mt-0.5">AI Business Platform</p>
+                        <p class="text-white font-bold text-sm leading-none tracking-wide">NexaOps</p>
+                        <p class="text-xs mt-0.5" style="color:rgba(148,163,184,0.7)">AI Platform</p>
                     </div>
                 </div>
-                <!-- Close button (mobile only) -->
-                <button onclick="closeSidebar()"
-                    class="lg:hidden text-gray-400 hover:text-white p-1 rounded-lg hover:bg-gray-800">
-                    <i class="fa-solid fa-xmark text-lg"></i>
+                <button onclick="closeSidebar()" class="lg:hidden p-1 rounded-lg transition" style="color:#94a3b8"
+                    onmouseover="this.style.color='#ffffff';this.style.background='rgba(255,255,255,0.1)'"
+                    onmouseout="this.style.color='#94a3b8';this.style.background='transparent'">
+                    <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
 
-            <!-- Nav links -->
-            <nav class="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+            <!-- Divider -->
+            <div class="sidebar-divider mx-4 mb-3" style="height:1px;"></div>
 
-                <p class="text-gray-500 text-xs font-semibold uppercase tracking-wider px-3 mb-2">Main</p>
+            <!-- Nav -->
+            <nav class="flex-1 px-3 space-y-0.5 pb-4 overflow-y-auto">
+
+                <!-- Section: Main -->
+                <p class="nav-section-label px-3 pt-1 pb-2 text-xs font-semibold uppercase tracking-widest">Main</p>
 
                 <a href="/dashboard/" onclick="closeSidebar()"
-                    class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800 text-sm {% if request.path == '/dashboard/' %}active{% endif %}">
-                    <i class="fa-solid fa-house-chimney w-5 text-center"></i>
+                    class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm {% if request.path == '/dashboard/' %}active{% endif %}">
+                    <i class="nav-icon fa-solid fa-house-chimney w-4 text-center"></i>
                     <span>Dashboard</span>
                 </a>
 
+                <a href="{% url 'analytics_dashboard' %}" onclick="closeSidebar()"
+                    class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm {% if '/analytics/' in request.path %}active{% endif %}">
+                    <i class="nav-icon fa-solid fa-chart-line w-4 text-center"></i>
+                    <span>Analytics</span>
+                </a>
+
+                <a href="{% url 'calendar_view' %}" onclick="closeSidebar()"
+                    class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm {% if '/dashboard/calendar' in request.path %}active{% endif %}">
+                    <i class="nav-icon fa-regular fa-calendar w-4 text-center"></i>
+                    <span>Calendar</span>
+                </a>
+
                 <a href="/tasks/" onclick="closeSidebar()"
-                    class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800 text-sm {% if '/tasks/' in request.path %}active{% endif %}">
-                    <i class="fa-solid fa-list-check w-5 text-center"></i>
+                    class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm {% if '/tasks/' in request.path and '/kanban' not in request.path %}active{% endif %}">
+                    <i class="nav-icon fa-solid fa-list-check w-4 text-center"></i>
                     <span>Tasks</span>
                 </a>
 
+                <a href="{% url 'kanban_board' %}" onclick="closeSidebar()"
+                    class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm {% if '/tasks/kanban' in request.path %}active{% endif %}">
+                    <i class="nav-icon fa-solid fa-table-columns w-4 text-center"></i>
+                    <span>Kanban Board</span>
+                </a>
+
                 <a href="/projects/" onclick="closeSidebar()"
-                    class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800 text-sm {% if '/projects/' in request.path %}active{% endif %}">
-                    <i class="fa-solid fa-diagram-project w-5 text-center"></i>
+                    class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm {% if '/projects/' in request.path %}active{% endif %}">
+                    <i class="nav-icon fa-solid fa-diagram-project w-4 text-center"></i>
                     <span>Projects</span>
                 </a>
 
                 <a href="/employees/" onclick="closeSidebar()"
-                    class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800 text-sm {% if '/employees/' in request.path %}active{% endif %}">
-                    <i class="fa-solid fa-users w-5 text-center"></i>
+                    class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm {% if '/employees/' in request.path %}active{% endif %}">
+                    <i class="nav-icon fa-solid fa-users w-4 text-center"></i>
                     <span>Employees</span>
                 </a>
 
                 <a href="/meetings/" onclick="closeSidebar()"
-                    class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800 text-sm {% if '/meetings/' in request.path %}active{% endif %}">
-                    <i class="fa-solid fa-video w-5 text-center"></i>
+                    class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm {% if '/meetings/' in request.path %}active{% endif %}">
+                    <i class="nav-icon fa-solid fa-video w-4 text-center"></i>
                     <span>Meetings</span>
                 </a>
 
                 <a href="/documents/" onclick="closeSidebar()"
-                    class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800 text-sm {% if '/documents/' in request.path %}active{% endif %}">
-                    <i class="fa-solid fa-folder-open w-5 text-center"></i>
+                    class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm {% if '/documents/' in request.path %}active{% endif %}">
+                    <i class="nav-icon fa-solid fa-folder-open w-4 text-center"></i>
                     <span>Documents</span>
                 </a>
 
-                <div class="pt-3 pb-1">
-                    <p class="text-gray-500 text-xs font-semibold uppercase tracking-wider px-3">AI Tools</p>
-                </div>
+                <a href="/timetracking/" onclick="closeSidebar()"
+                    class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm {% if '/timetracking/' in request.path %}active{% endif %}">
+                    <i class="nav-icon fa-solid fa-clock w-4 text-center"></i>
+                    <span>Time Tracking</span>
+                </a>
+
+                <a href="{% url 'notification_list' %}" onclick="closeSidebar()"
+                    class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm {% if '/notifications/' in request.path %}active{% endif %}">
+                    <i class="nav-icon fa-solid fa-bell w-4 text-center"></i>
+                    <span>Notifications</span>
+                    <span id="sidebar-badge"
+                        class="ml-auto bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full hidden font-bold"></span>
+                </a>
+
+                <!-- Section: AI -->
+                <p class="nav-section-label px-3 pt-4 pb-2 text-xs font-semibold uppercase tracking-widest">AI Tools</p>
 
                 <a href="/ai/assistant/" onclick="closeSidebar()"
-                    class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800 text-sm {% if '/ai/' in request.path %}active{% endif %}">
-                    <i class="fa-solid fa-robot w-5 text-center text-indigo-400"></i>
+                    class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm {% if '/ai/assistant' in request.path %}active{% endif %}">
+                    <i class="nav-icon fa-solid fa-robot w-4 text-center" style="color:#818cf8 !important"></i>
                     <span>AI Assistant</span>
-                    <span class="ml-auto bg-indigo-600 text-white text-xs px-1.5 py-0.5 rounded-full">AI</span>
+                    <span class="ml-auto text-xs px-1.5 py-0.5 rounded-full font-bold"
+                        style="background:rgba(99,102,241,0.25);color:#818cf8">AI</span>
                 </a>
 
                 <a href="/ai/email-writer/" onclick="closeSidebar()"
-                    class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800 text-sm">
-                    <i class="fa-solid fa-envelope-open-text w-5 text-center text-indigo-400"></i>
+                    class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm {% if '/ai/email' in request.path %}active{% endif %}">
+                    <i class="nav-icon fa-solid fa-envelope-open-text w-4 text-center"
+                        style="color:#818cf8 !important"></i>
                     <span>Email Writer</span>
-                    <span class="ml-auto bg-indigo-600 text-white text-xs px-1.5 py-0.5 rounded-full">AI</span>
                 </a>
 
-                <div class="pt-3 pb-1">
-                    <p class="text-gray-500 text-xs font-semibold uppercase tracking-wider px-3">Settings</p>
-                </div>
+                <a href="/ai/task-generator/" onclick="closeSidebar()"
+                    class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm {% if '/ai/task-generator' in request.path %}active{% endif %}">
+                    <i class="nav-icon fa-solid fa-wand-magic-sparkles w-4 text-center"
+                        style="color:#818cf8 !important"></i>
+                    <span>Task Generator</span>
+                </a>
 
-                <a href="/admin/"
-                    class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800 text-sm">
-                    <i class="fa-solid fa-shield-halved w-5 text-center"></i>
+                <a href="/ai/agenda-builder/" onclick="closeSidebar()"
+                    class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm {% if '/ai/agenda' in request.path %}active{% endif %}">
+                    <i class="nav-icon fa-solid fa-list-check w-4 text-center" style="color:#818cf8 !important"></i>
+                    <span>Agenda Builder</span>
+                </a>
+
+                <a href="/ai/proposal-writer/" onclick="closeSidebar()"
+                    class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm {% if '/ai/proposal' in request.path %}active{% endif %}">
+                    <i class="nav-icon fa-solid fa-file-contract w-4 text-center" style="color:#818cf8 !important"></i>
+                    <span>Proposal Writer</span>
+                </a>
+
+                <a href="/ai/search/" onclick="closeSidebar()"
+                    class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm {% if '/ai/search' in request.path %}active{% endif %}">
+                    <i class="nav-icon fa-solid fa-magnifying-glass w-4 text-center"
+                        style="color:#818cf8 !important"></i>
+                    <span>Smart Search</span>
+                </a>
+
+                <!-- Section: Account -->
+                <p class="nav-section-label px-3 pt-4 pb-2 text-xs font-semibold uppercase tracking-widest">Account</p>
+
+                {% if request.user.is_admin_role %}
+                <a href="{% url 'billing_dashboard' %}" onclick="closeSidebar()"
+                    class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm {% if '/billing/' in request.path %}active{% endif %}">
+                    <i class="nav-icon fa-solid fa-credit-card w-4 text-center"></i>
+                    <span>Billing</span>
+                    {% with request.user.subscription.plan as plan %}
+                    {% if plan == 'pro' %}
+                    <span class="ml-auto text-xs px-1.5 py-0.5 rounded-full font-bold"
+                        style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff">PRO</span>
+                    {% elif plan == 'enterprise' %}
+                    <span class="ml-auto text-xs px-1.5 py-0.5 rounded-full font-bold"
+                        style="background:#1e293b;color:#94a3b8">ENT</span>
+                    {% endif %}
+                    {% endwith %}
+                </a>
+                {% endif %}
+
+                <a href="{% url 'profile' %}" onclick="closeSidebar()"
+                    class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm {% if '/accounts/profile' in request.path %}active{% endif %}">
+                    <i class="nav-icon fa-solid fa-circle-user w-4 text-center"></i>
+                    <span>My Profile</span>
+                </a>
+
+                <a href="{% url 'api_settings' %}" onclick="closeSidebar()"
+                    class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm {% if '/accounts/api-settings' in request.path %}active{% endif %}">
+                    <i class="nav-icon fa-solid fa-code w-4 text-center"></i>
+                    <span>API Access</span>
+                </a>
+
+                <a href="{% url 'slack_settings_page' %}" onclick="closeSidebar()"
+                    class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm {% if '/slack/' in request.path %}active{% endif %}">
+                    <i class="nav-icon fa-brands fa-slack w-4 text-center"></i>
+                    <span>Slack</span>
+                </a>
+
+                {% if request.user.is_admin_role %}
+                <a href="{% url 'audit_log_list' %}" onclick="closeSidebar()"
+                    class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm {% if '/audit/' in request.path %}active{% endif %}">
+                    <i class="nav-icon fa-solid fa-clipboard-list w-4 text-center"></i>
+                    <span>Audit Log</span>
+                </a>
+
+                <a href="/admin/" class="nav-item flex items-center gap-3 px-3 py-2.5 text-sm">
+                    <i class="nav-icon fa-solid fa-shield-halved w-4 text-center"></i>
                     <span>Admin Panel</span>
                 </a>
+                {% endif %}
 
             </nav>
 
-            <!-- User info at bottom -->
-            <div class="px-4 py-3 border-t border-gray-700 flex-shrink-0">
-                <a href="/accounts/profile/"
-                    class="flex items-center gap-3 hover:bg-gray-800 rounded-xl px-2 py-2 transition">
-                    <div class="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white text-sm font-semibold flex-shrink-0 overflow-hidden">
-                        {% if request.user.avatar %}
-                        <img src="{{ request.user.avatar.url }}" class="w-full h-full object-cover">
-                        {% else %}
-                        {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
-                        {% endif %}
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-white text-sm font-medium truncate">{{ request.user.get_full_name|default:request.user.email }}</p>
-                        <p class="text-gray-400 text-xs truncate">{{ request.user.email }}</p>
-                    </div>
-                    <a href="/accounts/logout/" class="text-gray-400 hover:text-white text-sm p-1 flex-shrink-0"
-                       title="Sign out">
-                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                    </a>
+            <!-- Logout button at bottom -->
+            <div class="mx-3 mb-3">
+                <a href="{% url 'account_logout' %}"
+                    class="flex items-center gap-3 p-3 rounded-2xl w-full transition sidebar-logout">
+                    <i class="fa-solid fa-arrow-right-from-bracket text-sm"></i>
+                    <span class="text-sm font-medium">Sign out</span>
                 </a>
             </div>
-
         </aside>
 
-        <!-- ===== MAIN CONTENT ===== -->
-        <div class="flex-1 flex flex-col overflow-hidden min-w-0">
+        <!-- ═══════════════════════════════════════════
+     MAIN AREA
+═══════════════════════════════════════════ -->
+        <div id="main-area" class="flex-1 flex flex-col overflow-hidden min-w-0">
 
-            <!-- Top navbar -->
-            <header class="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between flex-shrink-0 gap-3">
+            <!-- Top bar -->
+            <header id="topbar" class="px-4 lg:px-6 py-3 flex items-center justify-between flex-shrink-0 gap-4">
+
+                <!-- Left: hamburger + breadcrumb -->
                 <div class="flex items-center gap-3 min-w-0">
-                    <!-- Hamburger (mobile only) -->
                     <button id="hamburger-btn" onclick="openSidebar()"
-                        class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg flex-shrink-0">
-                        <i class="fa-solid fa-bars text-lg"></i>
+                        class="lg:hidden p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition flex-shrink-0">
+                        <i class="fa-solid fa-bars"></i>
                     </button>
-                    <h1 class="text-base lg:text-lg font-semibold text-gray-800 truncate">
-                        {% block page_title %}Dashboard{% endblock %}
-                    </h1>
+                    <div class="min-w-0">
+                        <h1 class="text-base lg:text-lg font-bold text-gray-800 truncate leading-none">
+                            {% block page_title %}Dashboard{% endblock %}
+                        </h1>
+                        <p class="text-xs text-gray-400 mt-0.5 hidden sm:block">NexaOps AI Platform</p>
+                    </div>
                 </div>
+
+                <!-- Right: search + bell + avatar -->
                 <div class="flex items-center gap-2 flex-shrink-0">
-                    <button class="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg">
-                        <i class="fa-solid fa-bell"></i>
-                        <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+
+                    <!-- Dark mode toggle -->
+                    <button type="button" class="theme-toggle" onclick="toggleTheme()" id="theme-toggle"
+                        title="Toggle dark mode" aria-label="Toggle dark mode">
+                        <span class="theme-toggle-dot" id="theme-dot">
+                            <i class="fa-solid fa-sun" style="color:#f59e0b;font-size:9px" id="theme-icon"></i>
+                        </span>
                     </button>
+
+                    <!-- Quick search -->
+                    <div class="hidden md:flex items-center gap-2 bg-gray-100 rounded-xl px-3 py-2 text-sm text-gray-400 cursor-pointer hover:bg-gray-200 transition"
+                        style="min-width:160px">
+                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                        <span class="text-xs">Quick search...</span>
+                        <span class="ml-auto text-xs bg-gray-200 px-1.5 py-0.5 rounded font-mono">⌘K</span>
+                    </div>
+
+                    <!-- Notification Bell -->
+                    <div class="relative" id="notif-wrapper">
+                        <button onclick="toggleDropdown()" id="bell-btn"
+                            class="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition">
+                            <i class="fa-solid fa-bell text-base"></i>
+                            <span id="notif-badge"
+                                class="hidden absolute -top-0.5 -right-0.5 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold leading-none"></span>
+                        </button>
+
+                        <!-- Dropdown -->
+                        <div id="notif-dropdown"
+                            class="hidden absolute right-0 top-12 w-80 bg-white rounded-2xl border border-gray-100 z-50 overflow-hidden">
+                            <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-6 h-6 bg-indigo-100 rounded-lg flex items-center justify-center">
+                                        <i class="fa-solid fa-bell text-indigo-600 text-xs"></i>
+                                    </div>
+                                    <p class="font-semibold text-gray-800 text-sm">Notifications</p>
+                                </div>
+                                <div class="flex gap-3">
+                                    <button onclick="markAllRead()"
+                                        class="text-xs text-indigo-600 hover:underline font-medium">Mark all
+                                        read</button>
+                                    <a href="{% url 'notification_list' %}"
+                                        class="text-xs text-gray-400 hover:text-gray-600">View all</a>
+                                </div>
+                            </div>
+                            <div id="notif-content" class="max-h-80 overflow-y-auto divide-y divide-gray-50">
+                                <div class="py-8 text-center text-gray-300 text-sm">
+                                    <i class="fa-solid fa-bell text-2xl mb-2 block"></i> Loading...
+                                </div>
+                            </div>
+                            <div class="px-4 py-3 border-t border-gray-50 bg-gray-50/80">
+                                <a href="{% url 'notification_preferences' %}"
+                                    class="text-xs text-gray-400 hover:text-indigo-600 flex items-center gap-1.5 transition">
+                                    <i class="fa-solid fa-sliders text-xs"></i> Notification preferences
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Avatar -->
                     <a href="/accounts/profile/"
-                        class="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white text-sm font-semibold cursor-pointer overflow-hidden flex-shrink-0">
+                        class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-bold cursor-pointer overflow-hidden flex-shrink-0 transition hover:scale-105"
+                        style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">
                         {% if request.user.avatar %}
                         <img src="{{ request.user.avatar.url }}" class="w-full h-full object-cover">
-                        {% else %}
+                        {% elif request.user.first_name %}
                         {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
-                        {% endif %}
+                        {% else %}U{% endif %}
                     </a>
                 </div>
             </header>
 
             <!-- Page content -->
-            <main class="flex-1 overflow-y-auto p-4 lg:p-6">
+            <main id="main-scroll" class="flex-1 overflow-y-auto p-4 lg:p-6">
+
                 {% if messages %}
                 {% for message in messages %}
-                <div class="mb-4 px-4 py-3 rounded-lg text-sm
-                    {% if message.tags == 'success' %}bg-green-50 text-green-800 border border-green-200
-                    {% elif message.tags == 'error' %}bg-red-50 text-red-800 border border-red-200
-                    {% else %}bg-blue-50 text-blue-800 border border-blue-200{% endif %}">
-                    <i class="fa-solid {% if message.tags == 'success' %}fa-circle-check{% elif message.tags == 'error' %}fa-circle-xmark{% else %}fa-circle-info{% endif %} mr-2"></i>
+                <div class="mb-4 px-4 py-3 rounded-xl text-sm flex items-center gap-2 page-section
+            {% if message.tags == 'success' %}alert-success
+            {% elif message.tags == 'error' %}alert-error
+            {% else %}alert-info{% endif %}">
+                    <i
+                        class="fa-solid {% if message.tags == 'success' %}fa-circle-check{% elif message.tags == 'error' %}fa-circle-xmark{% else %}fa-circle-info{% endif %}"></i>
                     {{ message }}
                 </div>
                 {% endfor %}
@@ -255,33 +656,133 @@
 
                 {% block content %}{% endblock %}
             </main>
-
         </div>
     </div>
 
-    <!-- Mobile sidebar JS -->
+    <!-- ─── Scripts ─── -->
     <script>
+        // Sidebar
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebar-overlay');
-
         function openSidebar() {
             sidebar.classList.add('open');
             overlay.classList.remove('hidden');
             setTimeout(() => overlay.classList.remove('opacity-0'), 10);
             document.body.style.overflow = 'hidden';
         }
-
         function closeSidebar() {
             sidebar.classList.remove('open');
             overlay.classList.add('opacity-0');
             setTimeout(() => overlay.classList.add('hidden'), 300);
             document.body.style.overflow = '';
         }
+        window.addEventListener('resize', () => { if (window.innerWidth >= 1024) closeSidebar(); });
 
-        // Close sidebar on resize to desktop
-        window.addEventListener('resize', () => {
-            if (window.innerWidth >= 1024) {
-                closeSidebar();
+        // Notifications
+        let dropdownOpen = false;
+        function toggleDropdown() {
+            dropdownOpen = !dropdownOpen;
+            const dd = document.getElementById('notif-dropdown');
+            if (dropdownOpen) { dd.classList.remove('hidden'); loadDropdown(); }
+            else dd.classList.add('hidden');
+        }
+        document.addEventListener('click', e => {
+            const w = document.getElementById('notif-wrapper');
+            if (w && !w.contains(e.target)) {
+                document.getElementById('notif-dropdown')?.classList.add('hidden');
+                dropdownOpen = false;
+            }
+        });
+
+        // Dark mode toggle
+        function toggleTheme() {
+            const root = document.documentElement;
+            const current = root.getAttribute('data-theme') || 'light';
+            const next = current === 'dark' ? 'light' : 'dark';
+            root.setAttribute('data-theme', next);
+            root.style.colorScheme = next;
+            localStorage.setItem('nexaops-theme', next);
+            updateThemeIcon(next);
+        }
+
+        function updateThemeIcon(theme) {
+            const icon = document.getElementById('theme-icon');
+            if (!icon) return;
+            if (theme === 'dark') {
+                icon.className = 'fa-solid fa-moon';
+                icon.style.color = '#818cf8';
+            } else {
+                icon.className = 'fa-solid fa-sun';
+                icon.style.color = '#f59e0b';
+            }
+        }
+
+        window.toggleTheme = toggleTheme;
+
+        // Set correct icon on load
+        document.addEventListener('DOMContentLoaded', () => {
+            const current = document.documentElement.getAttribute('data-theme') || 'light';
+            updateThemeIcon(current);
+        });
+
+        function loadDropdown() {
+            fetch("{% url 'notification_dropdown' %}").then(r => r.text()).then(html => {
+                document.getElementById('notif-content').innerHTML = html;
+            });
+        }
+        function markRead(pk) {
+            fetch(`/notifications/${pk}/read/`, { method: 'POST', headers: { 'X-CSRFToken': '{{ csrf_token }}' } });
+        }
+        function markAllRead() {
+            fetch("{% url 'mark_all_read' %}", { method: 'POST', headers: { 'X-CSRFToken': '{{ csrf_token }}' } })
+                .then(() => { updateBadge(0); loadDropdown(); });
+        }
+        function updateBadge(count) {
+            ['notif-badge', 'sidebar-badge'].forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                if (count > 0) { el.textContent = count > 9 ? '9+' : count; el.classList.remove('hidden'); }
+                else el.classList.add('hidden');
+            });
+        }
+        function pollNotifications() {
+            fetch("{% url 'notification_count' %}").then(r => r.json()).then(d => updateBadge(d.count));
+        }
+        pollNotifications();
+        setInterval(pollNotifications, 30000);
+
+        // Animated counter
+        function animateCounter(el, target, duration = 1200) {
+            let start = 0;
+            const step = timestamp => {
+                if (!start) start = timestamp;
+                const progress = Math.min((timestamp - start) / duration, 1);
+                const ease = 1 - Math.pow(1 - progress, 3);
+                el.textContent = Math.floor(ease * target);
+                if (progress < 1) requestAnimationFrame(step);
+                else el.textContent = target;
+            };
+            requestAnimationFrame(step);
+        }
+
+        // Run counters on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('[data-counter]').forEach(el => {
+                const target = parseInt(el.dataset.counter);
+                animateCounter(el, target);
+            });
+            // Animate progress bars
+            setTimeout(() => {
+                document.querySelectorAll('[data-progress]').forEach(el => {
+                    el.style.width = el.dataset.progress + '%';
+                });
+            }, 300);
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault();
+                window.location.href = '/ai/search/';
             }
         });
     </script>
