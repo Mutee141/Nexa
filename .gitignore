@@ -23,3 +23,6 @@ venv.bak/
 .vscode/
 .idea/
 *.swp
+
+# Auto-sync script #
+auto_sync.ps1
